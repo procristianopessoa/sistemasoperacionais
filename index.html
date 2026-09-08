@@ -2,46 +2,78 @@
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <!-- SEO & Metadados -->
     <title>Sistemas Operacionais · IFSP</title>
+    <meta name="description" content="Disciplina de Sistemas Operacionais do IFSP. Conectando fundamentos, arquitetura, Linux, Windows, Web, IoT e infraestrutura moderna.">
+    <meta name="author" content="Prof. Cristiano Pessoa">
+
+    <!-- Open Graph / Redes Sociais -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Sistemas Operacionais · IFSP">
+    <meta property="og:description" content="Compreender · Observar · Aplicar. Guia e trilha de estudo de Sistemas Operacionais.">
+    <meta property="og:locale" content="pt_BR">
+
+    <!-- Favicon & Estilos -->
+    <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/css/site.css">
   </head>
   <body>
-    <header>
-      <small>INSTITUTO FEDERAL DE SÃO PAULO · CIÊNCIA DA COMPUTAÇÃO</small>
-      <h1>Sistemas<br>Operacionais</h1>
-      <p>Compreender · Observar · Aplicar</p>
-      <nav>
-        <a href="#trilha">Trilha</a>
-        <a href="#laboratorios">Laboratórios</a>
-        <a href="#materiais">Materiais</a>
-      </nav>
+    <header class="site-header">
+      <div class="header-container">
+        <small class="institution">INSTITUTO FEDERAL DE SÃO PAULO · CIÊNCIA DA COMPUTAÇÃO</small>
+        <h1>Sistemas<br>Operacionais</h1>
+        <p class="tagline">Compreender · Observar · Aplicar</p>
+        
+        <nav aria-label="Navegação principal">
+          <ul>
+            <li><a href="#trilha">Trilha</a></li>
+            <li><a href="#laboratorios">Laboratórios</a></li>
+            <li><a href="#materiais">Materiais</a></li>
+          </ul>
+        </nav>
+      </div>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="hero">
         <h2>Hardware só se torna plataforma quando o sistema operacional organiza seus recursos.</h2>
         <p>Uma disciplina que conecta fundamentos, arquitetura, Linux, Windows, Web, IoT e infraestrutura moderna.</p>
       </section>
 
-      <section id="trilha">
-        <small>TRILHA DE ESTUDO</small>
-        <h2>Do problema à prática</h2>
+      <section id="trilha" aria-labelledby="trilha-title">
+        <small class="section-tag">TRILHA DE ESTUDO</small>
+        <h2 id="trilha-title">Do problema à prática</h2>
+        
         <div class="grid">
-          <a href="aulas/historia-sistemas-operacionais/"><b>01</b> História e evolução</a>
-          <a href="aulas/fundamentos/"><b>02</b> Fundamentos do SO</a>
-          <a href="aulas/arquitetura-kernel/"><b>03</b> Arquitetura e kernel</a>
-          <a href="aulas/processos-threads/"><b>04</b> Processos, threads e serviços</a>
-          <a href="aulas/shell-terminal-kernel/"><b>05</b> Shell, terminal e kernel</a>
-          <a href="#"><b>06</b> Escalonamento e concorrência</a>
+          <a href="aulas/historia-sistemas-operacionais/" class="card-link">
+            <span><b>01</b> História e evolução</span>
+          </a>
+          <a href="aulas/fundamentos/" class="card-link">
+            <span><b>02</b> Fundamentos do SO</span>
+          </a>
+          <a href="aulas/arquitetura-kernel/" class="card-link">
+            <span><b>03</b> Arquitetura e kernel</span>
+          </a>
+          <a href="aulas/processos-threads/" class="card-link">
+            <span><b>04</b> Processos, threads e serviços</span>
+          </a>
+          <a href="aulas/shell-terminal-kernel/" class="card-link">
+            <span><b>05</b> Shell, terminal e kernel</span>
+          </a>
+          <a href="#" class="card-link">
+            <span><b>06</b> Escalonamento e concorrência</span>
+          </a>
         </div>
       </section>
 
-      <section id="laboratorios">
-        <small>LABORATÓRIOS</small>
-        <h2>Aprender observando o sistema</h2>
+      <section id="laboratorios" aria-labelledby="lab-title">
+        <small class="section-tag">LABORATÓRIOS</small>
+        <h2 id="lab-title">Aprender observando o sistema</h2>
+        
         <div class="feature">
-          <div>
+          <div class="feature-content">
             <h3>Shell, Terminal e Kernel</h3>
             <p>Tutorial técnico, terminal simulado e desafio progressivo com evidências Linux.</p>
           </div>
@@ -49,15 +81,15 @@
         </div>
       </section>
 
-      <section id="materiais">
-        <small>MATERIAIS</small>
-        <h2>Slides, guias e referências</h2>
+      <section id="materiais" aria-labelledby="materiais-title">
+        <small class="section-tag">MATERIAIS</small>
+        <h2 id="materiais-title">Slides, guias e referências</h2>
         <p>Materiais de estudo, atividades e roteiros acompanham cada módulo da trilha.</p>
       </section>
     </main>
 
     <footer>
-      IFSP · Prof. Cristiano Pessoa · 2026
+      <p>&copy; 2026 IFSP · Prof. Cristiano Pessoa</p>
     </footer>
   </body>
 </html>
