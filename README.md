@@ -10,7 +10,7 @@ Olá! Sou o Cristiano, especialista em infraestrutura de TI, redes e cloud compu
 </p>
 
 <p align="left">
-🦄 <strong>Linguagens & Scripting:</strong> Python, Bash/Shell Script, SQL, HTML/CSS, JavaScript.
+Membro fundador do GT Academias IFSP, representante do IFSP no CONIF, responsável pelas academias RedHat (IFSP), AWS (IFSP), Cisco Academic Support Center (IFs de SP, PR, SC e RS) e Huawei (IFSP).
 </p>
 
 <p align="left">
