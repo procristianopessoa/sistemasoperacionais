@@ -1,139 +1,260 @@
+/* =========================================
+   Variáveis e Reset
+   ========================================= */
 :root {
-  --bg: #202428;
-  --panel: #111820;
-  --text: #f5f7fa;
-  --muted: #aeb9c6;
-  --cyan: #55c7e8;
-  --green: #70d891;
-  --orange: #e5ad46;
-  --line: #394651;
+  --bg-color: #0f172a;
+  --bg-card: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent-color: #00d4ff;
+  --accent-hover: #00a3cc;
+  --ifsp-blue: #0066b3;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --font-main: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  margin: 0;
-  background:
-    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
-    var(--bg);
-  background-size: 72px 72px;
-  color: var(--text);
-  font: 18px/1.6 Aptos, Arial, sans-serif;
-}
-
-header,
-main,
-footer {
-  max-width: 1120px;
-  margin: auto;
-  padding: 44px 28px;
-}
-
-header small,
-section small {
-  color: var(--muted);
-  letter-spacing: .12em;
-  font-weight: 700;
-}
-
-h1,
-h2 {
-  font-family: Georgia, serif;
-}
-
-h1 {
-  font-size: clamp(3.5rem, 9vw, 7rem);
-  line-height: .85;
-  margin: 20px 0;
-}
-
-h2 {
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  line-height: 1.05;
-}
-
-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 22px;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
-  color: var(--cyan);
   text-decoration: none;
+  color: inherit;
+  transition: color 0.3s ease;
 }
 
-a:hover {
-  color: var(--green);
+/* =========================================
+   Header & Navegação
+   ========================================= */
+.site-header {
+  background: linear-gradient(135deg, #0f2027, #203a43);
+  border-bottom: 1px solid var(--border-color);
+  padding: 2rem 1.5rem;
+  text-align: center;
 }
 
-.hero {
-  border-left: 7px solid var(--cyan);
-  padding: 26px;
-  background: var(--panel);
+.header-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.institution {
+  display: block;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+}
+
+.site-header h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+
+.tagline {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  margin-bottom: 2rem;
+}
+
+nav ul {
+  list-style: none;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+nav a {
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+  border-bottom: 2px solid transparent;
+}
+
+nav a:hover {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+}
+
+/* =========================================
+   Main Content & Seções
+   ========================================= */
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
 }
 
 section {
-  margin: 70px 0;
+  margin-bottom: 4rem;
 }
 
+.section-tag {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: var(--accent-color);
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+section h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
+}
+
+/* Hero Section */
+.hero {
+  text-align: center;
+  padding: 2rem 0 4rem;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 4rem;
+}
+
+.hero h2 {
+  font-size: 2rem;
+  max-width: 700px;
+  margin: 0 auto 1rem;
+  background: linear-gradient(90deg, #fff, #94a3b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Grid da Trilha */
 .grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
 }
 
-.grid a,
-.feature {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  padding: 22px;
-  color: var(--text);
+.card-link {
+  display: flex;
+  align-items: center;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.25rem;
+  transition: all 0.3s ease;
 }
 
-.grid a:hover {
-  border-color: var(--cyan);
+.card-link:hover {
+  border-color: var(--accent-color);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 212, 255, 0.1);
 }
 
-.grid b {
-  display: block;
-  color: var(--orange);
-  font: 20px Cascadia Mono, Consolas, monospace;
-  margin-bottom: 20px;
+.card-link b {
+  color: var(--accent-color);
+  margin-right: 0.75rem;
+  font-size: 1.1rem;
 }
 
+/* Laboratórios / Feature */
 .feature {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 28px;
+  flex-direction: column;
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 2rem;
+  gap: 1.5rem;
+}
+
+@media (min-width: 600px) {
+  .feature {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.feature-content h3 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.feature-content p {
+  color: var(--text-secondary);
 }
 
 .button {
-  border: 1px solid var(--green);
-  padding: 10px 14px;
-  color: var(--green);
+  display: inline-block;
+  background-color: var(--accent-color);
+  color: #0f172a;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 6px;
+  text-align: center;
   white-space: nowrap;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
+.button:hover {
+  background-color: var(--accent-hover);
+  transform: translateY(-2px);
+}
+
+/* Materiais */
+#materiais p {
+  color: var(--text-secondary);
+  font-size: 1.05rem;
+}
+
+/* =========================================
+   Footer
+   ========================================= */
 footer {
-  color: var(--muted);
-  border-top: 1px solid var(--line);
+  text-align: center;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 2rem;
 }
 
-@media (max-width: 700px) {
-  .grid {
-    grid-template-columns: 1fr;
+/* =========================================
+   Responsividade
+   ========================================= */
+@media (max-width: 600px) {
+  .site-header h1 {
+    font-size: 2rem;
   }
-
-  .feature {
-    display: block;
+  
+  .hero h2 {
+    font-size: 1.5rem;
   }
-
-  .button {
-    display: inline-block;
-    margin-top: 12px;
+  
+  nav ul {
+    gap: 1rem;
   }
 }
