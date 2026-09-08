@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shell, Terminal e Kernel — Fundamentos e Laboratório · Sistemas Operacionais · IFSP</title>
+<style>
+:root{
+  --estrutura:#0E1216; --tinta:#1C2430; --papel:#FAFBFC;
+  --destaque:#0E7490; --destaque-vivo:#22D3EE;
+  --confirmacao:#27C93F; --atencao:#FFBD2E; --erro:#FF6B6B;
+  --cinza:#9AA4AD; --linha:#E1E5EA;
+  --mono:"Cascadia Mono",Consolas,monospace;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:Aptos,"Segoe UI",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--papel);color:var(--tinta);font-family:var(--sans);
+  background-image:linear-gradient(rgba(14,116,144,.045) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(14,116,144,.045) 1px,transparent 1px);
+  background-size:56px 56px}
+.wrap{max-width:920px;margin:0 auto;padding:48px 28px 96px}
+.kicker{font-family:var(--mono);font-size:13px;letter-spacing:.12em;color:var(--destaque);text-transform:uppercase}
+h1{font-family:var(--serif);font-size:clamp(40px,6vw,74px);line-height:1.05;margin:.15em 0}
+h2{font-family:var(--serif);font-size:clamp(30px,4vw,44px);margin:0 0 14px}
+.num{font-family:var(--mono);color:var(--destaque-vivo);font-size:.55em;vertical-align:middle;margin-right:10px}
+section{margin:0 0 64px}
+p,li{font-size:19px;line-height:1.65}
+.lead{font-size:21px;color:#3D4855}
+.meta{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 8px}
+.meta span{font-family:var(--mono);font-size:13px;border:1px solid var(--linha);border-radius:999px;padding:5px 12px;background:#fff}
+nav.sumario{border:1px solid var(--linha);background:#fff;border-radius:12px;padding:16px 20px;margin:26px 0 56px}
+nav.sumario a{display:inline-block;margin:4px 14px 4px 0;color:var(--destaque);text-decoration:none;font-family:var(--mono);font-size:14px}
+nav.sumario a:hover{text-decoration:underline}
+nav.sumario a.lab-link{background:var(--destaque-vivo);color:#062A33;padding:4px 12px;border-radius:999px;font-weight:700}
+.conceito{border-left:4px solid var(--destaque-vivo);background:#F0F6F8;padding:14px 18px;margin:18px 0}
+.atencao-box{border-left:4px solid var(--atencao);background:#FFF8E6;padding:14px 18px;margin:18px 0}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:17px}
+th{background:var(--estrutura);color:#F5F7FA;text-align:left;padding:10px 12px}
+td{border-bottom:1px solid var(--linha);padding:10px 12px;vertical-align:top}
+code{font-family:var(--mono);font-size:.92em;background:#EEF1F4;padding:1px 5px;border-radius:4px}
+.terminal{background:var(--estrutura);border-radius:10px;overflow:hidden;font-family:var(--mono);
+  font-size:16px;line-height:1.6;margin:18px 0;box-shadow:0 8px 30px rgba(0,0,0,.18)}
+.term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:#161B22}
+.dot{width:11px;height:11px;border-radius:50%}
+.dot.r{background:#FF5F56}.dot.y{background:#FFBD2E}.dot.g{background:#27C93F}
+.term-title{margin-left:8px;color:var(--cinza);font-size:13px}
+.terminal pre{margin:0;padding:16px 18px;overflow-x:auto}
+.prompt{color:#4AF626}.cmd{color:#F5F7FA}.out{color:var(--cinza)}.leitura{color:var(--destaque-vivo)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.copy{font-family:var(--mono);font-size:13px;padding:6px 12px;border:1px solid var(--linha);
+  background:#fff;border-radius:999px;cursor:pointer;color:var(--destaque)}
+.copy:hover{border-color:var(--destaque-vivo)}
+.flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0}
+.flow button{font-family:var(--mono);font-size:15px;padding:8px 12px;border:1px solid var(--linha);
+  background:#fff;border-radius:8px;cursor:pointer}
+.flow button:hover{border-color:var(--destaque-vivo)}
+.flow .arrow{color:var(--cinza)}
+#layerInfo{min-height:30px;font-size:16px;color:var(--destaque);font-family:var(--mono);margin:6px 0 0}
+/* ---- FAIXA DESTACADA DO LABORATÓRIO ---- */
+.lab-band{background:var(--estrutura);border-radius:16px;padding:30px 28px;margin:0 0 64px;
+  border:1px solid #2A3138;box-shadow:0 14px 40px rgba(14,18,22,.35)}
+.lab-band h2{color:#F5F7FA}
+.lab-band .lead{color:#C6CED6}
+.badge-ativo{display:inline-block;font-family:var(--mono);font-size:13px;font-weight:700;
+  background:var(--destaque-vivo);color:#062A33;border-radius:999px;padding:6px 14px;margin:0 0 14px}
+.lab-band .task{background:#161B22;color:#F5F7FA;border-left-color:var(--destaque-vivo)}
+.lab-band .lab-prog{color:#C6CED6}
+.lab-band .hint-line{color:#7E8891}
+.lab-band .terminal{border:1px solid #2A3138;margin:14px 0 10px}
+.lab-band .restart{color:var(--destaque-vivo);border-color:var(--destaque-vivo)}
+.lab-head{display:flex;justify-content:space-between;align-items:center;margin:10px 0}
+.lab-prog{font-family:var(--mono);color:var(--cinza);font-size:14px}
+.lab-dots span{display:inline-block;width:10px;height:10px;border-radius:50%;background:#2A3138;margin-left:6px}
+.lab-dots span.ok{background:var(--confirmacao)}
+.lab-dots span.atual{background:var(--destaque-vivo)}
+.task{font-size:20px;line-height:1.5;border-left:4px solid var(--destaque-vivo);
+  padding:12px 16px;background:#F0F6F8;margin:0 0 14px}
+#termBody{padding:16px 18px;max-height:340px;overflow-y:auto;font-family:var(--mono);font-size:16px;line-height:1.6}
+#termBody .cmd{color:#F5F7FA}
+#termBody .cmd .prompt{color:#4AF626}
+#termBody .out{color:var(--cinza);white-space:pre-wrap}
+#termBody .leitura{color:var(--destaque-vivo);white-space:pre-wrap}
+#termBody .ok{color:var(--confirmacao);font-weight:600}
+#termBody .retry{color:var(--erro)}
+#termBody .hint{color:var(--atencao)}
+.term-line{display:flex;gap:8px;padding:0 18px 16px;align-items:center;font-family:var(--mono);font-size:16px}
+.term-line .prompt{color:#4AF626;white-space:nowrap}
+.term-line .path{color:var(--destaque-vivo)}
+.term-line input{flex:1;background:transparent;border:none;outline:none;color:#F5F7FA;font:inherit}
+.restart{margin-top:12px;font:inherit;padding:8px 16px;border:1px solid var(--destaque-vivo);
+  background:none;color:var(--destaque);border-radius:8px;cursor:pointer}
+.hint-line{color:var(--cinza);font-size:14px;font-family:var(--mono)}
+.refs li{margin-bottom:10px}
+footer{border-top:1px solid var(--linha);margin-top:40px;padding-top:18px;
+  font-family:var(--mono);font-size:13px;color:var(--cinza);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Sistemas Operacionais · IFSP · Prof. Cristiano Pessoa · Tutorial · Fundamentos</div>
+  <h1>Shell, Terminal e Kernel</h1>
+  <p class="lead">A base dos sistemas operacionais: da Web aos dispositivos IoT e IoE —
+     com fundamentos teóricos e laboratório interativo de comandos.</p>
+  
+  <nav class="sumario"><strong>Sumário</strong><br>
+    <a href="#f1">F1 O que é um SO</a><a href="#f2">F2 Tipos de SO</a>
+    <a href="#f3">F3 Estrutura do SO</a><a href="#f4">F4 Elementos do SO</a>
+    <a href="#f5">F5 SO × Hardware × Software</a><br>
+    <a href="#s1">01 SO em toda parte</a><a href="#s2">02 Web, IoT e IoE</a>
+    <a href="#s3">03 Camadas</a><a href="#s4">04 Kernel</a><a href="#s5">05 Shell</a>
+    <a href="#s6">06 Terminal</a><a href="#s7">07 Evidências Linux</a><br>
+    <a href="#lab" class="lab-link">07.5 Laboratório · mão na massa</a>
+    <a href="#s8">08 Atividade</a>
+  </nav>
+</header>
+
+<!-- ================= FUNDAMENTOS TEÓRICOS (ABREM A PÁGINA) ================= -->
+<div id="fundamentos">
+<section id="f1">
+  <h2><span class="num">F1</span>O que é um sistema operacional</h2>
+  <p>Um sistema operacional (SO) é a camada de software de sistema posicionada entre o
+     hardware e os programas aplicativos. A literatura o define por três papéis
+     complementares, não excludentes:</p>
+  <ul>
+    <li><strong>Máquina estendida (abstração):</strong> oculta a complexidade do hardware
+        e oferece interfaces limpas e uniformes — arquivos em vez de setores de disco,
+        processos em vez de registradores, sockets em vez de pacotes elétricos
+        (TANENBAUM; BOS, 2014).</li>
+    <li><strong>Gerenciador de recursos:</strong> arbitra CPU, memória e E/S entre
+        programas que competem por eles, buscando eficiência e justiça na distribuição
+        (SILBERSCHATZ; GALVIN; GAGNE, 2018).</li>
+    <li><strong>Programa de controle:</strong> garante execução correta e protege o
+        sistema contra erros e usos indevidos, impondo limites entre processos e entre
+        usuário e kernel (STALLINGS, 2018).</li>
+  </ul>
+  <p class="conceito"><strong>Conceito</strong> O SO transforma recursos físicos em
+     abstrações utilizáveis e arbitra o uso desses recursos entre programas
+     concorrentes. Suas metas clássicas são conveniência para o usuário, eficiência no
+     uso do hardware e capacidade de evoluir sem interromper o serviço.</p>
+  <p>A porção do SO que executa em modo privilegiado e permanece residente em memória é
+     o <strong>kernel</strong>; tudo o mais — shells, utilitários, bibliotecas — opera
+     em modo usuário, solicitando serviços a ele.</p>
+</section>
+
+<section id="f2">
+  <h2><span class="num">F2</span>Tipos de sistemas operacionais</h2>
+  <p>A classificação não é por "marca", e sim pelo <strong>padrão de uso e pelas
+     garantias</strong> que o sistema oferece:</p>
+  <table>
+    <tr><th>Tipo</th><th>Característica central</th><th>Exemplos</th></tr>
+    <tr><td>Lote (batch)</td><td>Executa jobs em sequência, sem interação; origem nos
+        mainframes dos anos 1960; sobrevive em filas e janelas de processamento
+        noturno.</td><td>Scripts batch, filas de jobs</td></tr>
+    <tr><td>Multiprogramável / multitarefa</td><td>Vários processos residentes em
+        memória com comutação de CPU; na variante de tempo compartilhado, garante
+        interatividade.</td><td>Linux, Windows, macOS</td></tr>
+    <tr><td>Tempo real</td><td>A correção depende de cumprir prazos (duros ou flexíveis);
+        falhar no prazo é falhar de verdade.</td><td>FreeRTOS, VxWorks, QNX, Linux PREEMPT_RT</td></tr>
+    <tr><td>Desktop / propósito geral</td><td>Prioriza resposta ao usuário e experiência
+        de uso.</td><td>Distribuições Linux, Windows, macOS</td></tr>
+    <tr><td>Móvel e embarcado</td><td>Restrições de energia, memória e térmica; opera
+        invisível ao usuário.</td><td>Android, iOS, Linux embarcado (roteadores, TVs, sensores)</td></tr>
+    <tr><td>Servidor e distribuído</td><td>Oferece serviços pela rede com disponibilidade
+        e escalabilidade.</td><td>Linux server, Windows Server</td></tr>
+  </table>
+  <p class="conceito"><strong>Conceito</strong> O mesmo kernel pode servir a vários
+     tipos: um Linux de servidor e um Linux embarcado diferem na configuração dos
+     gerenciadores, não na essência da arquitetura.</p>
+</section>
+
+<section id="f3">
+  <h2><span class="num">F3</span>Estrutura de um sistema operacional</h2>
+  <p>Estrutura é a decisão de <strong>onde cada serviço vive</strong> — dentro ou fora
+     do kernel — e define isolamento, desempenho e capacidade de evolução:</p>
+  <ul>
+    <li><strong>Monolítica:</strong> todos os serviços (processos, memória, arquivos,
+        E/S) em um único programa privilegiado. Alto desempenho, baixo isolamento;
+        Unix tradicional.</li>
+    <li><strong>Em camadas:</strong> o SO é dividido em níveis hierárquicos; cada camada
+        usa apenas serviços da inferior (sistema THE, de Dijkstra). Facilita depuração;
+        impõe fronteiras nem sempre naturais.</li>
+    <li><strong>Microkernel:</strong> o kernel mantém o mínimo (IPC, memória e processos
+        básicos); demais serviços rodam como servidores em modo usuário. Máxima
+        modularidade e isolamento, ao custo de mensagens; Mach, Minix 3, QNX.</li>
+    <li><strong>Híbrida:</strong> base microkernel com serviços integrados ao kernel por
+        desempenho; XNU (macOS), Windows NT.</li>
+    <li><strong>Modular (módulos carregáveis):</strong> monolítica moderna em que drivers
+        e subsistemas entram e saem do kernel em tempo de execução; Linux, Solaris —
+        o modelo dominante hoje.</li>
+  </ul>
+  <p class="conceito"><strong>Conceito</strong> Toda estrutura é um compromisso
+     (trade-off) arquitetural: quanto mais isolamento, mais comunicação; quanto mais
+     integração, mais desempenho e mais risco. A chamada de sistema é a fronteira
+     oficial que qualquer estrutura precisa respeitar.</p>
+</section>
+
+<section id="f4">
+  <h2><span class="num">F4</span>Elementos de um sistema operacional</h2>
+  <p>Os componentes que materializam o SO, do núcleo às ferramentas de apoio
+     (SILBERSCHATZ et al., 2018; MACHADO; MAIA, 2013):</p>
+  <table>
+    <tr><th>Elemento</th><th>Pergunta que responde</th><th>No Linux</th><th>No Windows</th></tr>
+    <tr><td>Kernel</td><td>Quem controla os recursos?</td><td>Linux 6.8</td><td>Kernel NT</td></tr>
+    <tr><td>Chamadas de sistema</td><td>Como o aplicativo pede um serviço?</td>
+        <td><code>openat</code>, <code>read</code>, <code>fork</code></td><td>API nativa NT (syscalls)</td></tr>
+    <tr><td>Shell / interface</td><td>Como o usuário expressa intenção?</td>
+        <td>bash, interfaces gráficas</td><td>PowerShell, Explorer</td></tr>
+    <tr><td>Gerenciador de processos</td><td>Quem escala e coordena execução?</td>
+        <td>Escalonador CFS/EEVDF</td><td>Escalonador NT</td></tr>
+    <tr><td>Gerenciador de memória</td><td>Quem aloca e protege endereços?</td>
+        <td>Paginação, swap</td><td>Paginação, arquivo de paginação</td></tr>
+    <tr><td>Sistema de arquivos</td><td>Como os dados persistem?</td>
+        <td>ext4, inodes</td><td>NTFS, MFT</td></tr>
+    <tr><td>Drivers / gerenciador de E/S</td><td>Como falar com cada dispositivo?</td>
+        <td>Módulos de kernel</td><td>Drivers <code>.sys</code></td></tr>
+    <tr><td>Proteção e segurança</td><td>Quem pode o quê?</td>
+        <td>Usuários, grupos, permissões</td><td>ACLs, tokens de acesso</td></tr>
+  </table>
+  <p class="conceito"><strong>Conceito</strong> Nenhum elemento age sozinho: o
+     gerenciador de processos depende do de memória, que depende do de arquivos (swap),
+     que depende dos drivers. O SO é um sistema de dependências cuidadosamente
+     ordenadas.</p>
+</section>
+
+<section id="f5">
+  <h2><span class="num">F5</span>SO, hardware e software: diferenças, interação e integração</h2>
+  <table>
+    <tr><th>Elemento</th><th>Natureza</th><th>Modo de execução</th><th>Papel</th></tr>
+    <tr><td>Hardware</td><td>Componentes físicos (CPU, memória, dispositivos)</td>
+        <td>—</td><td>Fornece capacidade bruta, sem propósito próprio</td></tr>
+    <tr><td>Sistema operacional</td><td>Software de sistema</td>
+        <td>Modo kernel (privilegiado)</td><td>Gerencia o hardware e serve os aplicativos</td></tr>
+    <tr><td>Software aplicativo</td><td>Programas de usuário</td>
+        <td>Modo usuário (restrito)</td><td>Resolve o problema do usuário</td></tr>
+  </table>
+  <p><strong>Interação em dois sentidos.</strong> No sentido descendente, o aplicativo
+     chama uma biblioteca (<code>libc</code>), que efetua uma chamada de sistema; ocorre
+     a troca de modo, o kernel atende o pedido acionando drivers e hardware. No sentido
+     ascendente, o hardware sinaliza eventos por <strong>interrupções</strong>; o kernel
+     trata o evento e acorda o processo que esperava por ele.</p>
+  <div class="terminal">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab · fronteira aplicativo ↔ kernel</span></div>
+<pre><span class="prompt">aluno@wsl:~$</span> <span class="cmd">strace ls 2&gt;&amp;1 | head -4</span>
+<span class="out">openat(AT_FDCWD, "/etc/ld.so.cache", O_RDONLY) = 3
+read(3, "\177ELF\2\1\1\3...", 832)          = 832
+openat(AT_FDCWD, ".", O_RDONLY|O_DIRECTORY) = 3</span>
+<span class="leitura">LEITURA: cada linha é uma chamada de sistema — a fronteira formal
+entre o software aplicativo e o kernel, capturada ao vivo.</span></pre>
+  </div>
+  <p><strong>Integração por três mecanismos.</strong> (1) <em>Abstração:</em> o disco vira
+     arquivo, a CPU vira processo, a placa de rede vira socket — o aplicativo nunca toca
+     o hardware diretamente. (2) <em>Padronização:</em> interfaces como POSIX e APIs de
+     drivers permitem que o mesmo software rode sobre hardwares diferentes.
+     (3) <em>Virtualização:</em> o próprio SO vira recurso gerenciado para outros
+     sistemas — hipervisores e contêineres fecham o ciclo.</p>
+  <p class="conceito"><strong>Conceito</strong> Hardware fornece, o SO arbitra e abstrai,
+     o software consome. A integração acontece em interfaces bem definidas: chamadas de
+     sistema, drivers e interrupções — contratos que permitem trocar qualquer uma das
+     três partes sem romper as demais.</p>
+</section>
+</div>
+<!-- ================= /FUNDAMENTOS ================= -->
+
+<section id="s1">
+  <h2><span class="num">01</span>Sistemas operacionais estão em toda parte</h2>
+  <p>Servidores, smartphones, roteadores, TVs, automóveis, sensores e equipamentos
+     industriais executam software e precisam controlar CPU, memória, dispositivos,
+     armazenamento e comunicação.</p>
+  <p class="conceito"><strong>Conceito</strong> O SO transforma recursos físicos em
+     abstrações utilizáveis, como processos, arquivos, memória virtual e sockets.</p>
+</section>
+
+<section id="s2">
+  <h2><span class="num">02</span>Da Web ao IoT e ao IoE</h2>
+  <p>A Web depende de hosts reais: processos respondem requisições, arquivos armazenam
+     conteúdo e sockets transportam dados. IoT conecta objetos; IoE integra objetos,
+     dados, processos e pessoas.</p>
+  <table>
+    <tr><th>Cenário</th><th>Recursos administrados</th><th>Exemplo</th></tr>
+    <tr><td>Servidor Web</td><td>processos, rede, arquivos</td><td>Linux</td></tr>
+    <tr><td>Roteador</td><td>interfaces e serviços</td><td>Linux embarcado</td></tr>
+    <tr><td>Sensor</td><td>tarefas, energia, periféricos</td><td>RTOS</td></tr>
+  </table>
+</section>
+
+<section id="s3">
+  <h2><span class="num">03</span>Uma arquitetura em camadas</h2>
+  <p>Aplicações pedem serviços; chamadas de sistema cruzam a fronteira de privilégio;
+     o kernel controla o hardware. <strong>Clique em cada camada</strong> para ver sua
+     responsabilidade:</p>
+  <div class="flow" id="flow">
+    <button data-info="Terminal: captura teclas e exibe texto — não interpreta nada.">Terminal</button><span class="arrow">→</span>
+    <button data-info="Shell: interpreta a intenção e a converte em chamadas de sistema.">Shell</button><span class="arrow">→</span>
+    <button data-info="Programas: processos em modo usuário executando a tarefa.">Programas</button><span class="arrow">→</span>
+    <button data-info="Chamadas de sistema: a fronteira formal entre usuário e kernel.">Syscalls</button><span class="arrow">→</span>
+    <button data-info="Kernel: gerencia CPU, memória e E/S em modo privilegiado.">Kernel</button><span class="arrow">→</span>
+    <button data-info="Hardware: recursos físicos que fornecem capacidade bruta.">Hardware</button>
+  </div>
+  <p id="layerInfo">↑ selecione uma camada</p>
+</section>
+
+<section id="s4">
+  <h2><span class="num">04</span>Kernel: o núcleo privilegiado</h2>
+  <p>Agenda processos, protege memória, opera dispositivos, organiza sistemas de
+     arquivos e oferece rede. Executa em modo privilegiado porque um erro nessa camada
+     pode comprometer o host inteiro.</p>
+  <div class="terminal">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab</span></div>
+<pre><span class="prompt">aluno@wsl:~$</span> <span class="cmd">uname -a</span>
+<span class="out">Linux ubuntu-lab 6.8.0-101-generic x86_64 GNU/Linux</span>
+<span class="leitura">LEITURA: o kernel em execução é o 6.8 — a camada privilegiada se apresenta.</span></pre>
+  </div>
+</section>
+
+<section id="s5">
+  <h2><span class="num">05</span>Shell: interpretação e automação</h2>
+  <p>O shell é um programa em espaço de usuário. Interpreta comandos, inicia processos,
+     controla variáveis e permite criar scripts repetíveis.</p>
+  <div class="terminal">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab</span></div>
+<pre><span class="prompt">aluno@wsl:~$</span> <span class="cmd">echo "$SHELL"</span>
+<span class="out">/bin/bash</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">whoami</span>
+<span class="out">aluno</span>
+<span class="leitura">LEITURA: identidade e interpretador vêm do sistema — não da janela.</span></pre>
+  </div>
+  <p class="atencao-box"><strong>Atenção</strong> Shell não é kernel: ele solicita
+     serviços ao sistema operacional.</p>
+</section>
+
+<section id="s6">
+  <h2><span class="num">06</span>Terminal: a interface textual</h2>
+  <p>Terminal pode ser console físico, emulador ou sessão SSH. É adequado a servidores,
+     contêineres, rede e recuperação porque reduz dependências e favorece automação.</p>
+  <div class="terminal">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab</span></div>
+<pre><span class="prompt">aluno@wsl:~$</span> <span class="cmd">tty</span>
+<span class="out">/dev/pts/0</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">echo $TERM</span>
+<span class="out">xterm-256color</span>
+<span class="leitura">LEITURA: o terminal se apresenta como arquivo de dispositivo — no Linux, tudo é arquivo.</span></pre>
+  </div>
+</section>
+
+<section id="s7">
+  <h2><span class="num">07</span>Comandos como evidências do sistema</h2>
+  <p>Não memorize sintaxe isolada. Identifique qual abstração cada comando torna
+     visível. Use os botões para levar o comando ao seu WSL:</p>
+  <div class="terminal">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab · diagnóstico inicial</span></div>
+<pre><span class="prompt">aluno@wsl:~$</span> <span class="cmd">free -h</span>
+<span class="leitura">LEITURA: memória e swap são abstrações gerenciadas pelo kernel.</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">df -h</span>
+<span class="leitura">LEITURA: sistemas de arquivos montados — o kernel organiza o disco.</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">ps aux --sort=-%mem | head</span>
+<span class="leitura">LEITURA: cada linha é um processo — a abstração central do SO.</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">ip a</span>
+<span class="leitura">LEITURA: interfaces de rede expostas pelo kernel como dispositivos.</span>
+<span class="prompt">aluno@wsl:~$</span> <span class="cmd">systemctl --type=service</span>
+<span class="leitura">LEITURA: daemons trabalham em segundo plano por você.</span></pre>
+  </div>
+  <div class="chips">
+    <button class="copy" data-cmd="free -h">free -h</button>
+    <button class="copy" data-cmd="df -h">df -h</button>
+    <button class="copy" data-cmd="ps aux --sort=-%mem | head">ps aux | head</button>
+    <button class="copy" data-cmd="ip a">ip a</button>
+    <button class="copy" data-cmd="systemctl --type=service">systemctl</button>
+  </div>
+</section>
+
+<section id="s8">
+  <h2><span class="num">08</span>Atividade: diagnóstico fundamentado</h2>
+  <div class="passos" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin:18px 0">
+    <div style="border:1px solid var(--linha);background:#fff;border-radius:12px;padding:16px">
+      <b style="font-family:var(--mono);color:var(--destaque);display:block;margin-bottom:6px">1 · COLETAR</b>
+      Execute os comandos no WSL ou host Linux e registre as saídas.</div>
+    <div style="border:1px solid var(--linha);background:#fff;border-radius:12px;padding:16px">
+      <b style="font-family:var(--mono);color:var(--destaque);display:block;margin-bottom:6px">2 · INTERPRETAR</b>
+      Explique a abstração observada, o recurso envolvido e a função do SO.</div>
+    <div style="border:1px solid var(--linha);background:#fff;border-radius:12px;padding:16px">
+      <b style="font-family:var(--mono);color:var(--destaque);display:block;margin-bottom:6px">3 · COMPARAR</b>
+      Descreva como a evidência seria obtida por GUI e avalie dependências,
+      repetibilidade e automação.</div>
+  </div>
+
+</section>
+
+<!-- ================= 08.5 LABORATÓRIO · FAIXA DESTACADA ================= -->
+<section id="lab" class="lab-band">
+  <span class="badge-ativo">● MÃO NA MASSA — AGORA É A SUA VEZ</span>
+  <h2><span class="num">08.5</span>Laboratório: desafios de terminal</h2>
+  <p class="lead">Cada missão aceita apenas o comando correto. Errou? Tente novamente —
+     a dica aparece após duas tentativas.</p>
+  <div class="lab-head">
+    <span id="labProg" class="lab-prog">Desafio 1/8</span>
+    <span id="labDots" class="lab-dots"></span>
+  </div>
+  <div class="task" id="labTask"></div>
+  <div class="terminal" aria-label="Terminal de desafios">
+    <div class="term-bar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="term-title">WSL · ubuntu-lab (desafios)</span></div>
+    <div id="termBody" role="log" aria-live="polite"></div>
+    <form class="term-line" id="termForm">
+      <span class="prompt">aluno@ubuntu-lab:<span class="path" id="promptPath">~</span>$</span>
+      <input id="termInput" autocomplete="off" spellcheck="false" aria-label="Digite o comando da missão">
+    </form>
+  </div>
+  <button id="labRestart" class="restart" hidden>↻ Recomeçar desafios</button>
+  <p class="hint-line">Os comandos validados aqui são os mesmos das evidências da seção 07.</p>
+
+</section>
+
+<section>
+  <h2><span class="num">∎</span>Síntese</h2>
+  <p>O kernel administra recursos, o shell interpreta a intenção e o terminal permite
+     interação. Hardware fornece, o SO arbitra e abstrai, o software consome.
+     Essa base sustenta serviços Web e dispositivos conectados.</p>
+</section>
+
+<section id="refs">
+  <h2><span class="num">REF</span>Referências oficiais</h2>
+  <ul class="refs">
+    <li>SILBERSCHATZ, Abraham; GALVIN, Peter B.; GAGNE, Greg.
+        <em>Operating System Concepts</em>. 10. ed. Hoboken: Wiley, 2018.</li>
+    <li>TANENBAUM, Andrew S.; BOS, Herbert.
+        <em>Modern Operating Systems</em>. 4. ed. Harlow: Pearson, 2014.</li>
+    <li>STALLINGS, William.
+        <em>Operating Systems: Internals and Design Principles</em>. 9. ed. Hoboken: Pearson, 2018.</li>
+    <li>MACHADO, Francis B.; MAIA, Luiz P.
+        <em>Arquitetura de Sistemas Operacionais</em>. 5. ed. Rio de Janeiro: LTC, 2013.</li>
+  </ul>
+</section>
+
+<footer>
+  <span>IFSP · Prof. Cristiano Pessoa · 2026 · 02</span>
+  <span>COMPREENDER · OBSERVAR · APLICAR</span>
+</footer>
+</div>
+
+<script>
+/* ---- Camadas clicáveis (seção 03) ---- */
+document.querySelectorAll("#flow button").forEach(b=>{
+  b.addEventListener("click",()=>{document.getElementById("layerInfo").textContent=b.dataset.info;});
+});
+/* ---- Copiar para WSL (seção 07) ---- */
+document.querySelectorAll(".copy").forEach(b=>{
+  b.addEventListener("click",()=>{
+    navigator.clipboard.writeText(b.dataset.cmd);
+    const t=b.textContent;b.textContent="copiado ✓";
+    setTimeout(()=>b.textContent=t,1500);
+  });
+});
+
+
+/* ---- Laboratório: modo desafio ---- */
+(function(){
+const DESAFIOS=[
+ {e:"Missão 1 · Verifique o conteúdo do diretório atual.",
+  a:["ls","ls -l","ls -a","ls -la","ls -al"],s:"notas.txt  scripts/",
+  l:"LEITURA: diretório é uma tabela que nomeia arquivos — listá-lo é ler essa tabela.",
+  d:"Duas letras, sem argumentos."},
+ {e:"Missão 2 · Mostre o caminho absoluto do diretório em que você está.",
+  a:["pwd"],s:"/home/aluno",
+  l:"LEITURA: o kernel mantém o mapa da posição atual do processo.",
+  d:"'print working directory'."},
+ {e:"Missão 3 · Revele a versão do kernel em execução.",
+  a:["uname -r","uname -a"],s:"6.8.0-101-generic",
+  l:"LEITURA: esta saída é a assinatura do kernel — a camada privilegiada se apresenta.",
+  d:"uname com a opção de release."},
+ {e:"Missão 4 · Entre no diretório que guarda as configurações do sistema.",
+  a:["cd /etc"],s:"",
+  l:"LEITURA: mudar de diretório atualiza o contexto do processo no sistema de arquivos.",
+  d:"O diretório de configuração é /etc."},
+ {e:"Missão 5 · Volte para o seu diretório pessoal.",
+  a:["cd","cd ~","cd $HOME","cd /home/aluno"],s:"",
+  l:"LEITURA: ~ é atalho para /home/aluno — o shell resolve antes do kernel.",
+  d:"Sozinho, o cd leva você para casa."},
+ {e:"Missão 6 · Exiba o conteúdo do arquivo notas.txt.",
+  a:["cat notas.txt","cat ./notas.txt","cat ~/notas.txt"],
+  s:"Aula: o shell interpreta; o kernel executa.",
+  l:"LEITURA: ler um arquivo é uma chamada de sistema atendida pelo kernel.",
+  d:"O comando que 'concatena e imprime'."},
+ {e:"Missão 7 · Verifique o uso de memória e swap em formato legível.",
+  a:["free -h","free --human"],
+  s:"              total  usado  livre\nMem:           7,6Gi  2,1Gi  4,3Gi\nSwap:          2,0Gi  0,0Bi  2,0Gi",
+  l:"LEITURA: memória e swap são abstrações gerenciadas pelo kernel.",
+  d:"free com a opção 'humana'."},
+ {e:"Missão 8 · Identifique o usuário da sessão atual.",
+  a:["whoami"],s:"aluno",
+  l:"LEITURA: a identidade vem do kernel, não do terminal.",
+  d:"'Quem sou eu?' em inglês."}
+];
+const body=document.getElementById("termBody"),form=document.getElementById("termForm"),
+      input=document.getElementById("termInput"),task=document.getElementById("labTask"),
+      prog=document.getElementById("labProg"),dots=document.getElementById("labDots"),
+      pPath=document.getElementById("promptPath"),restart=document.getElementById("labRestart");
+let i=0,tent=0,cwd="~";
+const norm=c=>c.trim().replace(/\s+/g," ");
+const print=(cls,t)=>{const d=document.createElement("div");d.className=cls;
+  d.textContent=t;body.appendChild(d);body.scrollTop=body.scrollHeight;};
+const echo=raw=>{const d=document.createElement("div");d.className="cmd";
+  d.innerHTML='<span class="prompt">aluno@ubuntu-lab:'+cwd+'$</span> ';
+  d.appendChild(document.createTextNode(raw));
+  body.appendChild(d);body.scrollTop=body.scrollHeight;};
+function renderDots(){dots.innerHTML="";DESAFIOS.forEach((_,k)=>{
+  const s=document.createElement("span");
+  if(k<i)s.className="ok";else if(k===i)s.className="atual";dots.appendChild(s);});}
+function renderTask(){renderDots();prog.textContent="Desafio "+(i+1)+"/"+DESAFIOS.length;
+  task.textContent=DESAFIOS[i].e;tent=0;}
+function finish(){renderDots();prog.textContent="Concluído "+DESAFIOS.length+"/"+DESAFIOS.length;
+  task.textContent="Todas as missões concluídas. Você leu o sistema — não apenas digitou nele.";
+  print("ok","🎉 PARABÉNS! Laboratório concluído.");
+  print("leitura","LEITURA FINAL: cada comando certo abriu uma janela para uma abstração do SO.");
+  restart.hidden=false;input.disabled=true;}
+form.addEventListener("submit",ev=>{
+  ev.preventDefault();if(i>=DESAFIOS.length)return;
+  const cmd=norm(input.value);input.value="";if(!cmd)return;
+  echo(cmd);const dz=DESAFIOS[i];
+  if(dz.a.includes(cmd)){
+    if(dz.s)print("out",dz.s);
+    print("leitura",dz.l);print("ok","✓ PARABÉNS! Comando correto.");
+    if(i===3){cwd="/etc";pPath.textContent=cwd;}
+    if(i===4){cwd="~";pPath.textContent=cwd;}
+    i++;
+    if(i>=DESAFIOS.length)setTimeout(finish,700);else setTimeout(renderTask,900);
+  }else{
+    tent++;print("retry","✗ Tente novamente.");
+    if(tent>=2)print("hint","DICA: "+dz.d);
+  }
+});
+restart.addEventListener("click",()=>{
+  i=0;cwd="~";pPath.textContent=cwd;body.innerHTML="";
+  input.disabled=false;restart.hidden=true;
+  print("out","Laboratório reiniciado. Boa prática!");renderTask();});
+print("out","Modo desafio ativo: leia a missão e digite o comando correto.");
+renderTask();
+})();
+</script>
+</body>
+</html>
