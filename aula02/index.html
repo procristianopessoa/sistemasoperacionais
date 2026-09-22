@@ -1,0 +1,1180 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Aula interativa sobre processos e escalonamento, com fundamentos, demonstrações guiadas, simulador de FIFO, SJF e Round Robin e quiz final.">
+<title>Aula 04 · Processos e Escalonamento · Sistemas Operacionais · IFSP</title>
+<style>
+:root{
+  --estrutura:#0E1216;--estrutura-2:#161B22;--tinta:#1C2430;--papel:#FAFBFC;
+  --destaque:#0E7490;--destaque-vivo:#22D3EE;--confirmacao:#27C93F;
+  --atencao:#FFBD2E;--erro:#FF6B6B;--cinza:#9AA4AD;--linha:#E1E5EA;
+  --bg:var(--papel);--panel:#FFFFFF;--panel2:#F0F6F8;--text:var(--tinta);--muted:#3D4855;
+  --cyan:var(--destaque);--green:#16733A;--orange:#B45309;--coral:#B64036;
+  --violet:#674CA8;--line:var(--linha);--ink:#062A33;
+  --cyan-fill:var(--destaque-vivo);--green-fill:var(--confirmacao);--orange-fill:var(--atencao);--coral-fill:var(--erro);
+  --text-dark:#F5F7FA;--muted-dark:#C6CED6;--line-dark:#2A3138;
+  --mono:"Cascadia Mono",Consolas,monospace;--serif:Georgia,"Times New Roman",serif;
+  --sans:Aptos,"Segoe UI",Arial,sans-serif
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;color:var(--text);font:18px/1.65 var(--sans);
+  background:
+    linear-gradient(90deg,rgba(14,116,144,.045) 1px,transparent 1px),
+    linear-gradient(rgba(14,116,144,.045) 1px,transparent 1px),var(--bg);
+  background-size:56px 56px
+}
+button,input{font:inherit}
+button{cursor:pointer}
+button:focus-visible,input:focus-visible{outline:3px solid var(--cyan-fill);outline-offset:3px}
+.skip{position:absolute;left:16px;top:-80px;background:var(--orange-fill);color:var(--ink);padding:8px 12px;z-index:10}
+.skip:focus{top:16px}
+main{max-width:1180px;margin:auto;padding:44px 28px 80px}
+.kicker{font:700 12px var(--mono);letter-spacing:.14em;color:var(--muted)}
+h1,h2,h3{line-height:1.08}
+h1,h2{font-family:var(--serif);font-weight:500}
+h1{font-size:clamp(3rem,7vw,6.2rem);margin:18px 0 22px;max-width:980px}
+h2{font-size:clamp(2rem,4vw,3.1rem);margin:0 0 14px}
+h3{font-size:1.12rem;margin:0 0 8px;color:var(--orange)}
+.lead{font-size:1.3rem;color:var(--cyan);max-width:880px}
+.meta{display:flex;flex-wrap:wrap;gap:9px;margin:24px 0}
+.meta span{font:13px var(--mono);border:1px solid var(--line);padding:6px 11px;border-radius:999px;background:var(--panel2)}
+.lesson-nav{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 8px}
+.lesson-nav a{color:var(--text);text-decoration:none;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:8px 12px;font:700 12px var(--mono)}
+.lesson-nav a:hover,.lesson-nav a:focus-visible{border-color:var(--cyan);color:var(--cyan)}
+.section{border-top:1px solid var(--line);padding:38px 0}
+.section-label{font:700 12px var(--mono);letter-spacing:.12em;color:var(--orange)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--line);margin:22px 0}
+.card{background:var(--panel2);padding:20px;border-top:5px solid var(--cyan)}
+.card:nth-child(2){border-color:var(--green)}
+.card:nth-child(3){border-color:var(--orange)}
+.card p{margin:0;color:var(--muted);font-size:.96rem}
+.callout{background:#eaf7fa;border-left:5px solid var(--cyan);padding:16px 20px;margin:20px 0}
+.callout strong{color:var(--cyan)}
+.intro-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr);gap:4px;background:var(--line);margin:24px 0}
+.intro-copy,.concept-panel{background:var(--panel2);padding:24px}
+.intro-copy p{margin:0 0 16px}.intro-copy p:last-child{margin-bottom:0}
+.intro-copy strong{color:var(--cyan)}
+.concept-panel{border-top:5px solid var(--orange)}
+.concept-panel h3{font:700 12px var(--mono);letter-spacing:.1em;color:var(--orange);text-transform:uppercase}
+.concept-panel dl{margin:16px 0 0}
+.concept-panel dt{color:var(--text);font-weight:800;margin-top:12px}
+.concept-panel dd{color:var(--muted);margin:2px 0 0;font-size:.92rem}
+.story{font-size:1.08rem;border-left:5px solid var(--orange);padding:18px 22px;background:#fff5e7;margin:22px 0}
+.story strong{color:var(--orange)}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:24px 0}
+.flow-step{position:relative;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:18px 16px;min-height:150px}
+.flow-step:not(:last-child):after{content:"→";position:absolute;right:-18px;top:48%;z-index:2;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--orange-fill);color:var(--ink);font-weight:900}
+.flow-step b{display:block;font:700 12px var(--mono);letter-spacing:.08em;color:var(--cyan);margin-bottom:8px}
+.flow-step strong{display:block;margin-bottom:5px}
+.flow-step span{display:block;color:var(--muted);font-size:.88rem;line-height:1.45}
+.criteria{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;background:var(--line);margin:20px 0}
+.criterion{background:var(--panel2);padding:18px}
+.criterion b{display:block;color:var(--green);margin-bottom:5px}
+.criterion span{display:block;color:var(--muted);font-size:.88rem;line-height:1.45}
+.compare-intro{overflow-x:auto;border:1px solid var(--line);border-radius:8px;margin:22px 0}
+.compare-intro td{white-space:normal;vertical-align:top;min-width:145px}
+.compare-intro td:first-child{color:var(--orange);font-weight:800;min-width:120px}
+.bridge{display:flex;gap:15px;align-items:flex-start;background:#ebf7ef;border:1px solid #a8d5b9;padding:18px 20px;border-radius:10px;margin-top:24px}
+.bridge-mark{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:50%;background:var(--green-fill);color:var(--ink);font-weight:900}
+.bridge p{margin:0;color:#244c34}.bridge strong{color:var(--green)}
+.references{margin:18px 0 0;padding-left:24px;color:var(--muted)}
+.references li{margin:9px 0}.references a{color:var(--cyan)}
+.opening-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(300px,.9fr);gap:4px;background:var(--line);margin:22px 0}
+.opening-grid>div{background:var(--panel2);padding:24px}
+.opening-grid h3{margin-top:0}.opening-grid p:last-child{margin-bottom:0}
+.question-card{border-top:5px solid var(--orange);background:#fff5e7!important}
+.question-card .question{font:500 1.32rem/1.42 var(--serif);color:var(--text);margin:8px 0 0}
+.program-process{display:grid;grid-template-columns:1fr auto 1fr;gap:14px;align-items:stretch;margin:22px 0}
+.concept-side{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:21px}
+.concept-side.program{border-top:5px solid var(--violet)}.concept-side.process{border-top:5px solid var(--green)}
+.concept-side b{display:block;font:800 12px var(--mono);letter-spacing:.1em;margin-bottom:10px}
+.concept-side.program b{color:var(--violet)}.concept-side.process b{color:var(--green)}
+.concept-side ul{padding-left:20px;margin:0;color:var(--muted)}
+.concept-side li{margin:6px 0}
+.becomes{display:grid;place-items:center;color:var(--orange);font-size:1.8rem;font-weight:900}
+.cert-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}
+.cert-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:18px;position:relative;overflow:hidden}
+.cert-card:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--cyan)}
+.cert-card:nth-child(2):before{background:var(--green)}.cert-card:nth-child(3):before{background:var(--orange)}
+.cert-badge{display:inline-block;border-radius:4px;padding:3px 7px;margin-bottom:8px;background:#dfeff3;color:var(--cyan);font:800 11px var(--mono)}
+.cert-card:nth-child(2) .cert-badge{color:var(--green)}.cert-card:nth-child(3) .cert-badge{color:var(--orange)}
+.cert-card strong{display:block;margin-bottom:5px}.cert-card p{margin:0;color:var(--muted);font-size:.88rem;line-height:1.48}
+.scope-note{color:var(--muted);font-size:.85rem;border-left:3px solid var(--line);padding-left:12px}
+.demo-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:24px 0}
+.demo-card{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:20px;min-width:0}
+.demo-card h3{margin:0 0 7px}.demo-card p{color:var(--muted);font-size:.9rem;margin:0 0 14px}
+.demo-stage{aspect-ratio:3/1;background:#0a1015;border:1px solid #2b3943;border-radius:8px;padding:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.demo-gif{width:100%;height:100%;object-fit:contain;display:block}
+.demo-cpu{display:grid;place-items:center;width:68px;height:68px;border:2px solid var(--orange-fill);border-radius:10px;color:var(--orange-fill);font:800 13px var(--mono);box-shadow:0 0 20px rgba(229,173,70,.12)}
+.demo-queue{display:flex;gap:5px;align-items:center}.demo-token{display:grid;place-items:center;width:42px;height:42px;border-radius:7px;color:var(--ink);font:800 12px var(--mono);animation:tokenPulse 2.4s ease-in-out infinite}
+.demo-token:nth-child(1){background:var(--cyan-fill)}.demo-token:nth-child(2){background:var(--green-fill);animation-delay:.25s}.demo-token:nth-child(3){background:var(--orange-fill);animation-delay:.5s}
+.demo-arrow{color:#b8c4cb;font-size:1.35rem}
+.mini-gantt{display:flex;width:100%;height:58px;gap:3px;align-items:stretch}
+.mini-block{display:grid;place-items:center;border-radius:5px;color:var(--ink);font:800 11px var(--mono);transform-origin:left;animation:revealBlock 3.6s ease-in-out infinite}
+.mini-block.p1{background:var(--cyan-fill)}.mini-block.p2{background:var(--green-fill);animation-delay:.35s}.mini-block.p3{background:var(--orange-fill);animation-delay:.7s}
+.mini-bars{display:flex;align-items:flex-end;justify-content:center;gap:14px;width:100%;height:82px}
+.mini-bar{width:58px;border-radius:5px 5px 0 0;display:flex;align-items:flex-end;justify-content:center;padding:5px;color:var(--ink);font:800 10px var(--mono);animation:barGrow 3s ease-in-out infinite}
+.mini-bar.fifo{height:78px;background:var(--coral-fill)}.mini-bar.sjf{height:48px;background:var(--green-fill);animation-delay:.2s}.mini-bar.rr{height:62px;background:var(--cyan-fill);animation-delay:.4s}
+.demo-launch{margin-top:14px;width:100%;color:var(--text);background:#e8f3f6;border:1px solid #83b8c5;border-radius:7px;padding:9px 12px;font-weight:800}
+.demo-launch:hover{border-color:var(--cyan);color:var(--cyan)}
+.guided-note{background:#ebf7ef;border-left:5px solid var(--green);padding:17px 20px}.guided-note strong{color:var(--green)}
+@keyframes tokenPulse{0%,100%{transform:translateY(0);filter:brightness(.8)}45%{transform:translateY(-8px);filter:brightness(1.25)}}
+@keyframes revealBlock{0%,15%{transform:scaleX(.08);opacity:.25}45%,85%{transform:scaleX(1);opacity:1}100%{transform:scaleX(.08);opacity:.25}}
+@keyframes barGrow{0%,100%{transform:scaleY(.2);transform-origin:bottom;opacity:.35}45%,80%{transform:scaleY(1);transform-origin:bottom;opacity:1}}
+.quiz-head{display:flex;justify-content:space-between;gap:15px;align-items:center;margin:20px 0}
+.quiz-score{font:800 13px var(--mono);color:var(--green);border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:7px 12px}
+.mission{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:20px;margin:12px 0}
+.mission h3{margin-top:0}.scenario{color:var(--muted);margin:0 0 14px}
+.answers{display:grid;gap:7px;margin:12px 0}
+.answer{display:flex;gap:10px;align-items:flex-start;background:#ffffff;border:1px solid var(--line);border-radius:7px;padding:11px 13px;cursor:pointer;transition:.18s ease}
+.answer:hover{border-color:var(--cyan);background:#edf8fb}.answer input{margin-top:5px;accent-color:var(--cyan)}.answer span{flex:1}
+.answer.correct{border-color:var(--green);background:rgba(112,216,145,.09)}.answer.wrong{border-color:var(--coral);background:rgba(233,106,91,.09)}
+.quiz-check{background:var(--cyan-fill);color:var(--ink);border:0;border-radius:7px;padding:8px 13px;font-weight:800}
+.feedback{display:none;margin-top:11px;padding:12px 14px;border-left:4px solid var(--line);background:#ffffff}
+.feedback.show{display:block}.feedback.ok{border-color:var(--green);color:#205f3f}.feedback.err{border-color:var(--coral);color:#9f3028}
+.simulator{border:1px solid var(--line);background:var(--panel);box-shadow:0 18px 55px rgba(25,46,58,.13);border-radius:16px;overflow:hidden}
+.sim-head{padding:24px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:18px;align-items:flex-start}
+.sim-head p{margin:4px 0 0;color:var(--muted)}
+.live{font:700 12px var(--mono);color:var(--green);white-space:nowrap}
+.live:before{content:"";display:inline-block;width:9px;height:9px;background:var(--green);border-radius:50%;margin-right:8px;box-shadow:0 0 0 5px rgba(112,216,145,.12)}
+.sim-grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(270px,.8fr);gap:1px;background:var(--line)}
+.panel{background:var(--panel);padding:24px 26px;min-width:0}
+.panel-title{font:700 13px var(--mono);letter-spacing:.08em;color:var(--cyan);margin:0 0 14px}
+.scenario-row,.choice-row,.actions,.transport{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.small-label{color:var(--muted);font:13px var(--mono);margin-right:4px}
+.chip,.btn,.icon-btn{
+  color:var(--text);background:#ffffff;border:1px solid var(--line);border-radius:7px;
+  padding:9px 13px;font-weight:700
+}
+.chip:hover,.btn:hover,.icon-btn:hover{border-color:var(--cyan)}
+.chip.active{background:var(--cyan-fill);color:var(--ink);border-color:var(--cyan)}
+.btn.primary{background:var(--orange-fill);color:var(--ink);border-color:var(--orange)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.secondary{background:#e8f3f6;border-color:#83b8c5}
+.btn.danger{color:var(--coral)}
+.icon-btn{min-width:44px;padding:8px 12px}
+.quantum-box{padding:14px;background:#ffffff;border:1px solid var(--line);border-radius:8px;margin-top:14px}
+.quantum-box[hidden]{display:none}
+.proc-wrap,.metrics-wrap,.compare-wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px}
+table{border-collapse:collapse;width:100%}
+th,td{padding:10px 11px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font:700 11px var(--mono);letter-spacing:.07em;color:var(--text-dark);background:var(--estrutura);text-transform:uppercase}
+td{font-size:.92rem}
+.proc-table input{
+  width:100%;min-width:72px;background:#ffffff;color:var(--text);border:1px solid #aebbc3;
+  padding:8px;border-radius:5px;font-family:var(--mono)
+}
+.proc-table input[type=number]{width:90px}
+.process-name{display:flex;align-items:center;gap:8px}
+.dot{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+.help{font-size:.88rem;color:var(--muted);margin:12px 0}
+.validation{min-height:26px;color:var(--coral);font-weight:700;margin:8px 0}
+.validation.ok{color:var(--green)}
+.result-area{padding:26px;background:#f3f7f8;border-top:1px solid var(--line)}
+.result-area[hidden]{display:none}
+.status-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;background:var(--line);margin-bottom:20px}
+.status{background:var(--panel2);padding:14px}
+.status small{display:block;color:var(--muted);font:11px var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.status strong{display:block;margin-top:5px;font:700 18px var(--mono);overflow-wrap:anywhere}
+.timeline-shell{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:#0a1015;padding:16px}
+.timeline{
+  display:grid;gap:3px;min-width:max-content;height:72px;align-items:stretch
+}
+.slice{
+  position:relative;display:flex;align-items:center;justify-content:center;min-width:34px;
+  border-radius:5px;color:#081016;font:800 14px var(--mono);opacity:.12;transform:translateY(7px);
+  transition:opacity .24s ease,transform .24s ease
+}
+.slice.visible{opacity:1;transform:none}
+.slice.idle{background:#6b7280!important;color:white}
+.slice span{position:absolute;left:7px;bottom:3px;font-size:10px;font-weight:600;opacity:.8}
+.timeline-axis{display:grid;gap:3px;min-width:max-content;margin-top:6px}
+.tick{font:11px var(--mono);color:#bdc8cf;border-left:1px solid #52616c;padding-left:4px}
+.explanation{margin:16px 0;padding:16px 18px;background:#eaf7fa;border-left:4px solid var(--cyan)}
+.explanation strong{color:var(--cyan)}
+.transport{justify-content:space-between}
+.transport-left{display:flex;gap:7px;align-items:center}
+.speed{display:flex;gap:5px;align-items:center;color:var(--muted);font:12px var(--mono)}
+.speed input{accent-color:var(--cyan)}
+.metrics-wrap{margin-top:18px}
+.metrics td,.metrics th{text-align:center}
+.metrics td:first-child,.metrics th:first-child{text-align:left}
+.metrics tfoot td{color:var(--cyan);font-weight:800;border-top:2px solid var(--cyan)}
+.metric-note{font-size:.86rem;color:var(--muted)}
+.compare-wrap{margin-top:18px}
+.best{color:var(--green);font-weight:800}
+.lesson{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--line);margin-top:24px}
+.lesson>div{background:var(--panel2);padding:20px}
+.lesson strong{color:var(--orange)}
+details{background:var(--panel2);border:1px solid var(--line);padding:16px 18px;margin:12px 0}
+summary{cursor:pointer;color:var(--orange);font-weight:700}
+footer{border-top:1px solid var(--line);padding-top:20px;color:var(--cinza);font:12px var(--mono);display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+
+/* Identidade visual unificada com code (5).html */
+.kicker{color:var(--cyan);text-transform:uppercase}
+.lead{color:var(--muted)}
+.meta span,.lesson-nav a{background:#fff}
+.section-label{color:var(--cyan)}
+.card,.intro-copy,.concept-panel,.opening-grid>div,.concept-side,.cert-card,.demo-card,.criterion,.lesson>div,details{background:var(--panel2)}
+.callout,.explanation{background:#F0F6F8;border-left-color:var(--cyan)}
+.story,.question-card{background:#FFF8E6!important}
+.bridge,.guided-note{background:#F0F6F8;border-color:#B9DEE8}
+.bridge p{color:var(--text)}
+.cert-badge{background:#E6F4F8}
+.demo-launch{background:#fff;border-color:var(--line)}
+.demo-launch:hover{background:#F0F6F8;border-color:var(--cyan-fill)}
+
+/* Faixa de laboratório: mesma superfície escura do simulador-fonte. */
+.simulator{background:var(--estrutura);border-color:var(--line-dark);box-shadow:0 14px 40px rgba(14,18,22,.35)}
+.sim-head{border-bottom-color:var(--line-dark)}
+.sim-head h3{color:var(--text-dark)}.sim-head p{color:var(--muted-dark)}
+.live{color:var(--cyan-fill)}.live:before{background:var(--confirmacao);box-shadow:0 0 0 5px rgba(39,201,63,.13)}
+.sim-grid{background:var(--line-dark)}.panel{background:var(--estrutura)}
+.panel-title{color:var(--cyan-fill)}.small-label,.help,.speed{color:var(--muted-dark)}
+.chip,.btn,.icon-btn{background:transparent;border-color:var(--line-dark);color:var(--muted-dark);font-family:var(--mono)}
+.chip:hover,.btn:hover,.icon-btn:hover{border-color:var(--cyan-fill);color:var(--cyan-fill)}
+.chip.active,.btn.primary,.quiz-check{background:var(--cyan-fill);border-color:var(--cyan-fill);color:var(--ink)}
+.btn.secondary{background:transparent;border-color:var(--cinza);color:var(--cinza)}
+.btn.secondary:hover{border-color:var(--cyan-fill);color:var(--cyan-fill)}.btn.danger{color:var(--erro)}
+.quantum-box{background:var(--estrutura-2);border-color:var(--line-dark)}
+.proc-wrap,.metrics-wrap,.compare-wrap{border-color:var(--line-dark)}
+.proc-table th,.metrics th,.compare-wrap th{background:var(--estrutura-2);color:var(--muted-dark)}
+.proc-table td,.metrics td,.compare-wrap td{border-bottom-color:var(--line-dark);color:var(--text-dark)}
+.proc-table input{background:var(--estrutura);border-color:var(--line-dark);color:var(--text-dark)}
+.validation{color:var(--erro)}.validation.ok{color:var(--confirmacao)}
+.result-area{background:var(--estrutura);border-top-color:var(--line-dark)}
+.status-grid{background:var(--line-dark)}.status{background:var(--estrutura-2)}
+.status small{color:var(--muted-dark)}.status strong{color:var(--text-dark)}
+.timeline-shell{border-color:var(--line-dark);background:var(--estrutura-2)}
+.explanation{background:var(--estrutura-2);border-left-color:var(--destaque-vivo);color:var(--muted-dark)}
+.explanation strong{color:var(--cyan-fill)}.metric-note{color:var(--muted-dark)}
+.metrics tfoot td{color:var(--cyan-fill);border-top-color:var(--cyan-fill)}.best{color:var(--confirmacao)}
+
+/* O quiz é o encerramento prático da aula e segue a mesma banda escura. */
+#quiz{background:var(--estrutura);border:1px solid var(--line-dark);border-radius:16px;padding:30px 28px;margin-top:42px;box-shadow:0 14px 40px rgba(14,18,22,.24)}
+#quiz h2{color:var(--text-dark)}#quiz>p{color:var(--muted-dark)}#quiz .section-label{color:var(--cyan-fill)}
+#quiz .quiz-score{background:var(--estrutura-2);border-color:var(--line-dark);color:var(--cyan-fill)}
+#quiz .mission{background:var(--estrutura-2);border-color:var(--line-dark)}
+#quiz .mission h3{color:var(--cyan-fill)}#quiz .scenario{color:var(--muted-dark)}
+#quiz .answer{background:var(--estrutura);border-color:var(--line-dark);color:var(--text-dark)}
+#quiz .answer:hover{background:var(--estrutura);border-color:var(--cyan-fill)}#quiz .answer input{accent-color:var(--cyan-fill)}
+#quiz .answer.correct{border-color:var(--confirmacao);background:rgba(39,201,63,.1)}
+#quiz .answer.wrong{border-color:var(--erro);background:rgba(255,107,107,.1)}
+#quiz .feedback{background:var(--estrutura);color:var(--muted-dark)}
+#quiz .feedback.ok{border-color:var(--confirmacao);color:var(--muted-dark)}#quiz .feedback.err{border-color:var(--erro);color:var(--muted-dark)}
+#quiz #resetQuiz{border-color:var(--cinza);color:var(--muted-dark)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:850px){
+  main{padding:30px 16px 60px}.sim-grid{grid-template-columns:1fr}.cards{grid-template-columns:1fr}
+  .status-grid,.lesson,.intro-grid,.opening-grid{grid-template-columns:1fr}.sim-head{flex-direction:column}
+  .flow{grid-template-columns:1fr 1fr}.flow-step:nth-child(2):after{display:none}.criteria{grid-template-columns:1fr 1fr}
+  .cert-grid{grid-template-columns:1fr}.demo-grid{grid-template-columns:1fr}
+  .panel,.result-area{padding:20px 16px}.proc-table th,.proc-table td{padding:8px}
+}
+@media(max-width:560px){.flow,.criteria{grid-template-columns:1fr}.flow-step:not(:last-child):after{display:none}.bridge{display:block}.bridge-mark{margin-bottom:12px}.program-process{grid-template-columns:1fr}.becomes{transform:rotate(90deg)}.quiz-head{align-items:flex-start;flex-direction:column}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.slice{transition:none}.demo-token,.mini-block,.mini-bar{animation:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#simulador">Ir ao simulador</a>
+<main>
+<header>
+  <div class="kicker">Sistemas Operacionais · IFSP · Prof. Cristiano Pessoa</div>
+  <h1>Processos e escalonamento</h1>
+  <p class="lead">Como programas se tornam trabalho executável — e como o sistema operacional decide quem usa a CPU, em que ordem e por quanto tempo.</p>
+  <div class="meta">
+    <span>Programa × processo</span><span>Processos e fila de prontos</span><span>Políticas de escalonamento</span>
+    <span>FIFO / FCFS</span><span>SJF</span><span>Round Robin</span>
+  </div>
+  <nav class="lesson-nav" aria-label="Navegação da aula">
+    <a href="#contexto">01 · Contexto</a><a href="#conceitos">02 · Fundamentos</a><a href="#guiado">03 · Modo guiado</a>
+    <a href="#simulador">04 · Simulador</a><a href="#quiz">06 · Quiz</a>
+  </nav>
+</header>
+
+<section class="section" id="contexto" aria-labelledby="titulo-contexto">
+  <div class="section-label">01 · POR QUE ESTUDAR PROCESSOS?</div>
+  <h2 id="titulo-contexto">O computador executa muitos trabalhos ao mesmo tempo</h2>
+
+  <div class="opening-grid">
+    <div>
+      <h3>Uma situação comum</h3>
+      <p>Enquanto um navegador carrega uma página, serviços de rede respondem a conexões, o editor salva arquivos e o sistema atualiza áudio, relógio e interface. Servidores e dispositivos de IoT fazem o mesmo com bancos de dados, APIs, sensores e rotinas de manutenção.</p>
+      <p>A CPU, a memória e a entrada e saída são recursos finitos. O sistema operacional precisa transformar programas em unidades administráveis, acompanhar o que cada uma consome e organizar a concorrência entre elas.</p>
+    </div>
+    <div class="question-card">
+      <h3>Pergunta de partida</h3>
+      <p class="question">Como identificar o que está em execução, descobrir quem consome recursos e decidir quem deve usar a CPU primeiro — sem comprometer o sistema?</p>
+    </div>
+  </div>
+
+  <h3>Programa não é processo</h3>
+  <div class="program-process">
+    <div class="concept-side program">
+      <b>PROGRAMA</b>
+      <ul><li>É um arquivo com instruções.</li><li>Permanece armazenado em disco.</li><li>É uma descrição passiva do trabalho.</li></ul>
+    </div>
+    <div class="becomes" aria-hidden="true">→</div>
+    <div class="concept-side process">
+      <b>PROCESSO</b>
+      <ul><li>É uma instância em execução.</li><li>Possui PID, memória, registradores e estado.</li><li>Pode estar pronto, executando ou esperando.</li></ul>
+    </div>
+  </div>
+  <div class="callout"><strong>Exemplo:</strong> o executável do navegador é um programa. Ao iniciá-lo, o sistema cria processos com identidade e recursos próprios; o mesmo programa pode originar várias instâncias.</div>
+
+  <h3>Conexão com certificações e atuação profissional</h3>
+  <div class="cert-grid">
+    <article class="cert-card"><span class="cert-badge">RHCSA</span><strong>Administrar processos Linux</strong><p>Identificar processos com uso intensivo de CPU ou memória, encerrá-los com segurança e ajustar seu escalonamento.</p></article>
+    <article class="cert-card"><span class="cert-badge">CKA</span><strong>Workloads e troubleshooting</strong><p>Monitorar uso de recursos, compreender limites e analisar como workloads são posicionados e executados no cluster.</p></article>
+    <article class="cert-card"><span class="cert-badge">LINUX / CLOUD</span><strong>Diagnosticar antes de agir</strong><p>Ferramentas como ps, top, nice e renice dependem da compreensão de processo, prioridade, estado e consumo.</p></article>
+  </div>
+  <p class="scope-note">As certificações não exigem necessariamente a memorização de FIFO, SJF e Round Robin. Esses modelos fornecem a base para compreender prioridades, compartilhamento, resposta e diagnóstico. No CKA, “scheduling” significa principalmente posicionar Pods nos nós do cluster — uma camada diferente do escalonamento de processos na CPU.</p>
+</section>
+
+<section class="section" aria-labelledby="conceitos">
+  <div class="section-label">02 · FUNDAMENTOS DO ESCALONAMENTO</div>
+  <h2 id="conceitos">Da disputa pela CPU à decisão do sistema operacional</h2>
+
+  <div class="intro-grid">
+    <div class="intro-copy">
+      <p>Ao abrir um navegador, reproduzir uma música, executar um comando ou iniciar um serviço, criamos atividades que competem pelos recursos do computador. No sistema operacional, essas atividades são representadas por <strong>processos</strong>: programas em execução acompanhados de estado, registradores, memória, arquivos abertos e outras informações necessárias para que possam parar e continuar.</p>
+      <p>Mesmo quando vemos dezenas ou centenas de processos “ao mesmo tempo”, cada núcleo da CPU executa apenas um fluxo de instruções por vez. A sensação de simultaneidade surge porque o sistema alterna rapidamente entre trabalhos e, em máquinas multicore, distribui parte deles entre os núcleos disponíveis.</p>
+      <p>O componente responsável por escolher o próximo trabalho é o <strong>escalonador</strong>. Ele aplica uma política; o <strong>dispatcher</strong> concretiza a decisão, entregando a CPU ao processo selecionado. A troca exige salvar o estado do processo atual e restaurar o estado do próximo — operação chamada <strong>troca de contexto</strong>.</p>
+    </div>
+    <aside class="concept-panel" aria-label="Vocabulário essencial">
+      <h3>Vocabulário essencial</h3>
+      <dl>
+        <dt>Processo</dt><dd>Programa em execução, com identidade e estado próprios.</dd>
+        <dt>Burst de CPU</dt><dd>Intervalo em que o processo precisa executar instruções na CPU.</dd>
+        <dt>Fila de prontos</dt><dd>Processos aptos a executar, aguardando a escolha do escalonador.</dd>
+        <dt>Quantum</dt><dd>Fatia máxima de CPU concedida em políticas como Round Robin.</dd>
+        <dt>Preempção</dt><dd>Retirada da CPU antes de o processo terminar voluntariamente seu burst.</dd>
+      </dl>
+    </aside>
+  </div>
+
+  <div class="story"><strong>O problema central:</strong> se há mais processos prontos do que CPUs disponíveis, alguém precisa esperar. Escalonar não é apenas “escolher o próximo”; é equilibrar desempenho, justiça, resposta e previsibilidade.</div>
+
+  <h3>Como uma decisão de escalonamento acontece</h3>
+  <div class="flow" aria-label="Fluxo simplificado do escalonamento">
+    <div class="flow-step"><b>01 · CHEGADA</b><strong>O trabalho aparece</strong><span>Um processo é criado ou deixa de esperar por entrada e saída.</span></div>
+    <div class="flow-step"><b>02 · PRONTO</b><strong>Entra na fila</strong><span>Ele possui condições de executar, mas a CPU pode estar ocupada.</span></div>
+    <div class="flow-step"><b>03 · DECISÃO</b><strong>A política escolhe</strong><span>FIFO, SJF, Round Robin ou outra regra seleciona o próximo.</span></div>
+    <div class="flow-step"><b>04 · EXECUÇÃO</b><strong>Recebe a CPU</strong><span>Executa até terminar, bloquear ou ser interrompido pela política.</span></div>
+  </div>
+
+  <p>O escalonador é acionado em eventos como criação e término de processos, bloqueio para entrada e saída, retorno ao estado pronto e expiração de uma fatia de tempo. Em uma política <strong>não preemptiva</strong>, o processo normalmente conserva a CPU até terminar seu burst ou bloquear. Em uma política <strong>preemptiva</strong>, o sistema pode interrompê-lo para atender outro processo ou garantir compartilhamento.</p>
+
+  <h3>Por que usamos políticas diferentes?</h3>
+  <div class="criteria">
+    <div class="criterion"><b>Resposta</b><span>Quanto tempo o usuário espera até perceber a primeira reação do sistema?</span></div>
+    <div class="criterion"><b>Vazão</b><span>Quantos trabalhos o sistema consegue concluir em determinado intervalo?</span></div>
+    <div class="criterion"><b>Justiça</b><span>Os processos recebem oportunidades razoáveis ou algum pode esperar indefinidamente?</span></div>
+    <div class="criterion"><b>Previsibilidade</b><span>O comportamento é estável o bastante para o objetivo do sistema?</span></div>
+  </div>
+
+  <p>Um computador interativo valoriza resposta rápida; um servidor em lote pode priorizar vazão; um sistema de tempo real precisa respeitar prazos. Por isso, não existe um algoritmo universalmente “melhor”. Existe uma política mais adequada ao objetivo, à carga e às restrições do ambiente.</p>
+
+  <h3>As três políticas desta aula</h3>
+  <div class="cards">
+    <article class="card"><h3>FIFO / FCFS</h3><p>Executa pela ordem de chegada. É simples e previsível, mas um processo longo pode reter a CPU e produzir o efeito comboio.</p></article>
+    <article class="card"><h3>SJF não preemptivo</h3><p>Entre os processos prontos, escolhe o menor burst estimado. Pode reduzir a espera média, mas depende de previsão e pode desfavorecer trabalhos longos.</p></article>
+    <article class="card"><h3>Round Robin</h3><p>Distribui fatias de CPU em uma fila circular. Favorece interatividade e justiça, porém um quantum pequeno aumenta trocas de contexto.</p></article>
+  </div>
+
+  <div class="compare-intro">
+    <table>
+      <thead><tr><th>Política</th><th>Regra de escolha</th><th>Preempção</th><th>Ponto forte</th><th>Limitação principal</th></tr></thead>
+      <tbody>
+        <tr><td>FIFO / FCFS</td><td>Primeiro que chega</td><td>Não</td><td>Simplicidade e baixo overhead</td><td>Efeito comboio</td></tr>
+        <tr><td>SJF</td><td>Menor burst disponível</td><td>Não, nesta aula</td><td>Boa espera média quando a estimativa é correta</td><td>Exige estimar o burst; risco de espera prolongada</td></tr>
+        <tr><td>Round Robin</td><td>Próximo da fila circular</td><td>Sim, ao acabar o quantum</td><td>Boa resposta e compartilhamento</td><td>Quantum inadequado aumenta overhead ou aproxima FIFO</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout"><strong>Métricas que usaremos:</strong> turnaround é conclusão menos chegada; espera é turnaround menos burst; resposta é primeira execução menos chegada. O menor valor médio ajuda a comparar, mas não elimina critérios como justiça e previsibilidade.</div>
+
+  <div class="bridge"><div class="bridge-mark">▶</div><p><strong>Agora o simulador tem um propósito:</strong> construir a mesma carga de processos, trocar apenas a política e observar como a ordem de execução altera a fila, as métricas e a experiência percebida.</p></div>
+</section>
+
+<section class="section" id="guiado" aria-labelledby="titulo-guiado">
+  <div class="section-label">03 · VEJA ANTES DE EXPERIMENTAR</div>
+  <h2 id="titulo-guiado">Seis demonstrações para orientar a observação</h2>
+  <p>As animações abaixo antecipam o que será visto no simulador. Os botões carregam automaticamente os dados, o algoritmo e o quantum corretos: o aluno pode observar primeiro e editar depois.</p>
+
+  <div class="demo-grid">
+    <article class="demo-card">
+      <h3>1 · Vários processos, uma CPU</h3><p>P1, P2 e P3 estão prontos, mas apenas um deles pode ocupar este núcleo a cada instante.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/01-fila-prontos.gif" alt="Animação: P1, P2 e P3 aguardam na fila de prontos e P1 recebe a CPU."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="rr" data-q="2">Observar a fila no simulador</button>
+    </article>
+    <article class="demo-card">
+      <h3>2 · A política muda a decisão</h3><p>Os processos são os mesmos. A regra de escolha altera quem entra na CPU e quanto os demais esperam.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/02-politica-decide.gif" alt="Animação: FIFO, SJF e Round Robin aplicam regras diferentes para escolher o processo que receberá a CPU."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="sjf" data-q="2">Ver uma decisão do SJF</button>
+    </article>
+    <article class="demo-card">
+      <h3>3 · FIFO e o efeito comboio</h3><p>O processo longo chega primeiro e mantém a CPU até terminar; os curtos permanecem atrás dele.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/03-fifo-efeito-comboio.gif" alt="Animação do diagrama de Gantt FIFO, com P1 longo executando antes de P2 e P3."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="fifo" data-q="2">Executar demonstração FIFO</button>
+    </article>
+    <article class="demo-card">
+      <h3>4 · SJF favorece o menor burst</h3><p>A cada liberação da CPU, o menor trabalho já disponível é escolhido. A espera média tende a cair.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/04-sjf-menor-burst.gif" alt="Animação do diagrama de Gantt SJF não preemptivo, mostrando P1, depois P3 e então P2."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="sjf" data-q="2">Executar demonstração SJF</button>
+    </article>
+    <article class="demo-card">
+      <h3>5 · Round Robin divide o tempo</h3><p>Com quantum 2, cada processo recebe uma fatia e, se não terminar, retorna ao final da fila.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/05-round-robin-quantum.gif" alt="Animação do diagrama de Gantt Round Robin com quantum 2."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="rr" data-q="2">Executar Round Robin · q=2</button>
+    </article>
+    <article class="demo-card">
+      <h3>6 · Comparar exige critérios</h3><p>Menor espera não é o único objetivo: resposta, justiça, previsibilidade e overhead também importam.</p>
+      <div class="demo-stage"><img class="demo-gif" src="gifs/06-comparar-metricas.gif" alt="Animação que compara a espera média de FIFO, SJF e Round Robin."></div>
+      <button type="button" class="demo-launch" data-scenario="comboio" data-algo="rr" data-q="2" data-action="compare">Comparar os três algoritmos</button>
+    </article>
+  </div>
+  <div class="guided-note"><strong>Roteiro de leitura:</strong> acompanhe a CPU, observe a fila de prontos e compare as métricas. Somente depois altere chegadas, bursts e quantum.</div>
+</section>
+
+<section class="section" id="simulador" aria-labelledby="titulo-simulador">
+  <div class="section-label">04 · SIMULADOR INTERATIVO</div>
+  <h2 id="titulo-simulador">Edite, execute e compare</h2>
+
+  <div class="simulator">
+    <div class="sim-head">
+      <div>
+        <h3>Escalonador didático</h3>
+        <p>Os tempos são unidades abstratas. Não representam segundos reais nem o escalonador completo do Linux.</p>
+      </div>
+      <span class="live">SIMULADOR ATIVO</span>
+    </div>
+
+    <div class="sim-grid">
+      <div class="panel">
+        <div class="panel-title">PROCESSOS</div>
+        <div class="scenario-row" aria-label="Cenários prontos">
+          <span class="small-label">Carregar cenário:</span>
+          <button type="button" class="chip scenario" data-scenario="comboio">Processo longo primeiro</button>
+          <button type="button" class="chip scenario" data-scenario="intervalos">Chegadas espaçadas</button>
+          <button type="button" class="chip scenario" data-scenario="iguais">Bursts iguais</button>
+        </div>
+
+        <div class="proc-wrap">
+          <table class="proc-table">
+            <thead><tr><th>Cor</th><th>Processo</th><th>Chegada</th><th>Burst</th><th>Ação</th></tr></thead>
+            <tbody id="procBody"></tbody>
+          </table>
+        </div>
+        <p class="help">Chegada: inteiro entre 0 e 30. Burst: inteiro entre 1 e 20. Máximo de oito processos.</p>
+        <button type="button" class="btn secondary" id="addProcess">+ Adicionar processo</button>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">POLÍTICA</div>
+        <div class="choice-row" role="group" aria-label="Algoritmo">
+          <button type="button" class="chip algorithm" data-algo="fifo" aria-pressed="false">FIFO</button>
+          <button type="button" class="chip algorithm" data-algo="sjf" aria-pressed="false">SJF</button>
+          <button type="button" class="chip algorithm active" data-algo="rr" aria-pressed="true">Round Robin</button>
+        </div>
+
+        <div class="quantum-box" id="quantumBox">
+          <div class="small-label">Quantum do Round Robin</div>
+          <div class="choice-row" role="group" aria-label="Quantum">
+            <button type="button" class="chip quantum" data-q="1" aria-pressed="false">1</button>
+            <button type="button" class="chip quantum active" data-q="2" aria-pressed="true">2</button>
+            <button type="button" class="chip quantum" data-q="3" aria-pressed="false">3</button>
+            <button type="button" class="chip quantum" data-q="4" aria-pressed="false">4</button>
+            <button type="button" class="chip quantum" data-q="5" aria-pressed="false">5</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn primary" id="simulate">Calcular e animar</button>
+          <button type="button" class="btn" id="compare">Comparar algoritmos</button>
+          <button type="button" class="btn danger" id="reset">Restaurar exemplo</button>
+        </div>
+        <p class="validation" id="validation" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div class="result-area" id="results" hidden>
+      <div class="status-grid" aria-live="polite">
+        <div class="status"><small>Tempo</small><strong id="currentTime">0</strong></div>
+        <div class="status"><small>CPU</small><strong id="cpuState">—</strong></div>
+        <div class="status"><small>Fila pronta no início</small><strong id="readyQueue">—</strong></div>
+      </div>
+
+      <div class="panel-title">DIAGRAMA DE GANTT · <span id="algorithmName">Round Robin</span></div>
+      <div class="timeline-shell" aria-label="Diagrama de Gantt">
+        <div class="timeline" id="timeline"></div>
+        <div class="timeline-axis" id="timelineAxis"></div>
+      </div>
+
+      <div class="transport">
+        <div class="transport-left">
+          <button type="button" class="icon-btn" id="restartAnimation" aria-label="Reiniciar animação">↺</button>
+          <button type="button" class="icon-btn" id="playPause" aria-label="Pausar animação">⏸</button>
+          <button type="button" class="icon-btn" id="nextStep" aria-label="Avançar uma etapa">▶|</button>
+        </div>
+        <label class="speed">Velocidade
+          <input type="range" id="speed" min="250" max="1400" value="750" step="50">
+        </label>
+      </div>
+
+      <div class="explanation" id="explanation"><strong>Leitura:</strong> pressione Calcular e animar.</div>
+
+      <div class="panel-title">MÉTRICAS POR PROCESSO</div>
+      <div class="metrics-wrap">
+        <table class="metrics">
+          <thead><tr><th>Processo</th><th>Chegada</th><th>Burst</th><th>Conclusão</th><th>Turnaround</th><th>Espera</th><th>Resposta</th></tr></thead>
+          <tbody id="metricsBody"></tbody>
+          <tfoot id="metricsFoot"></tfoot>
+        </table>
+      </div>
+      <p class="metric-note">As métricas não incluem custo de troca de contexto. Empates seguem chegada e ordem original do cadastro.</p>
+
+      <div id="comparisonArea" hidden>
+        <div class="panel-title">COMPARAÇÃO DE MÉDIAS</div>
+        <div class="compare-wrap">
+          <table>
+            <thead><tr><th>Algoritmo</th><th>Turnaround médio</th><th>Espera média</th><th>Resposta média</th><th>Trocas/Fatias</th></tr></thead>
+            <tbody id="comparisonBody"></tbody>
+          </table>
+        </div>
+        <p class="metric-note">Menor média não define, sozinha, o melhor algoritmo. Considere justiça, previsibilidade, overhead e objetivo do sistema.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="roteiro">
+  <div class="section-label">05 · INVESTIGAÇÃO GUIADA</div>
+  <h2 id="roteiro">Quatro testes que revelam o comportamento</h2>
+  <div class="lesson">
+    <div><strong>Teste 1 · efeito comboio</strong><p>Carregue “Processo longo primeiro”. Compare FIFO e SJF. Explique o que mudou na espera de P2 e P3.</p></div>
+    <div><strong>Teste 2 · quantum</strong><p>No Round Robin, compare quantum 1 e 5. Observe resposta, número de fatias e fragmentação do Gantt.</p></div>
+    <div><strong>Teste 3 · CPU ociosa</strong><p>Carregue “Chegadas espaçadas”. Identifique os períodos em que nenhum processo estava pronto.</p></div>
+    <div><strong>Teste 4 · empates</strong><p>Carregue “Bursts iguais”. Verifique o critério de desempate e registre por que ele precisa ser declarado.</p></div>
+  </div>
+
+  <details>
+    <summary>Como interpretar FIFO</summary>
+    <p>O primeiro processo disponível mantém a CPU até terminar. Uma tarefa longa na frente da fila pode produzir o efeito comboio.</p>
+  </details>
+  <details>
+    <summary>Como interpretar SJF</summary>
+    <p>A cada liberação da CPU, o simulador escolhe o menor burst entre os que já chegaram. Como é não preemptivo, um processo em execução não é interrompido pela chegada de outro menor.</p>
+  </details>
+  <details>
+    <summary>Como interpretar Round Robin</summary>
+    <p>O processo executa até terminar ou consumir o quantum. Se ainda tiver trabalho, retorna ao final da fila depois que as novas chegadas daquele instante entram na fila.</p>
+  </details>
+</section>
+
+<section class="section" id="quiz" aria-labelledby="titulo-quiz">
+  <div class="section-label">06 · VERIFICAÇÃO DA APRENDIZAGEM</div>
+  <div class="quiz-head">
+    <h2 id="titulo-quiz">Desafio final: processos e escalonamento</h2>
+    <span class="quiz-score" id="quizScore">0 de 6 concluídas</span>
+  </div>
+  <p>Responda com base nos conceitos e nos experimentos realizados. O feedback explica o raciocínio; a atividade é formativa e não envia notas ao Moodle.</p>
+
+  <article class="mission" data-answer="b" data-explanation="Um processo é uma instância em execução, acompanhada de PID, estado, memória, registradores e outros recursos.">
+    <h3>Questão 1 · Programa e processo</h3>
+    <p class="scenario">Qual alternativa descreve corretamente um processo?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q1" value="a"><span>Um arquivo armazenado em disco que nunca muda de estado.</span></label>
+      <label class="answer"><input type="radio" name="q1" value="b"><span>Uma instância de programa em execução, com identidade, estado e recursos.</span></label>
+      <label class="answer"><input type="radio" name="q1" value="c"><span>Um núcleo físico da CPU reservado para um único aplicativo.</span></label>
+      <label class="answer"><input type="radio" name="q1" value="d"><span>Uma fila que contém somente programas encerrados.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+
+  <article class="mission" data-answer="c" data-explanation="A fila de prontos reúne processos aptos a executar, mas que ainda aguardam a escolha do escalonador e a disponibilidade da CPU.">
+    <h3>Questão 2 · Fila de prontos</h3>
+    <p class="scenario">Um processo está no estado pronto. O que isso significa?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q2" value="a"><span>Ele terminou e será removido da memória.</span></label>
+      <label class="answer"><input type="radio" name="q2" value="b"><span>Ele necessariamente está esperando uma operação de disco.</span></label>
+      <label class="answer"><input type="radio" name="q2" value="c"><span>Ele pode executar, mas está aguardando receber a CPU.</span></label>
+      <label class="answer"><input type="radio" name="q2" value="d"><span>Ele está executando simultaneamente em todos os núcleos.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+
+  <article class="mission" data-answer="a" data-explanation="No FIFO, um processo longo que chega primeiro mantém a CPU e faz os processos curtos aguardarem: é o efeito comboio.">
+    <h3>Questão 3 · Efeito comboio</h3>
+    <p class="scenario">P1 possui burst 10 e chega antes de P2 e P3, cujos bursts são menores. Qual política tende a produzir o efeito comboio?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q3" value="a"><span>FIFO / FCFS</span></label>
+      <label class="answer"><input type="radio" name="q3" value="b"><span>SJF não preemptivo</span></label>
+      <label class="answer"><input type="radio" name="q3" value="c"><span>Round Robin com quantum pequeno</span></label>
+      <label class="answer"><input type="radio" name="q3" value="d"><span>Nenhuma política, porque a ordem não altera a espera.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+
+  <article class="mission" data-answer="d" data-explanation="SJF depende de uma estimativa do próximo burst de CPU. Trabalhos longos também podem esperar por muito tempo se trabalhos curtos continuarem chegando.">
+    <h3>Questão 4 · Limitação do SJF</h3>
+    <p class="scenario">Qual é a principal dificuldade prática do SJF?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q4" value="a"><span>Ele sempre executa o processo mais antigo.</span></label>
+      <label class="answer"><input type="radio" name="q4" value="b"><span>Ele exige obrigatoriamente um quantum igual a 1.</span></label>
+      <label class="answer"><input type="radio" name="q4" value="c"><span>Ele impede completamente a execução de processos curtos.</span></label>
+      <label class="answer"><input type="radio" name="q4" value="d"><span>É necessário estimar o burst, e processos longos podem esperar excessivamente.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+
+  <article class="mission" data-answer="b" data-explanation="Um quantum menor normalmente melhora a oportunidade de resposta, mas gera mais preempções e aumenta o custo potencial de trocas de contexto.">
+    <h3>Questão 5 · Quantum no Round Robin</h3>
+    <p class="scenario">O que tende a acontecer quando o quantum é reduzido?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q5" value="a"><span>Round Robin se torna idêntico ao SJF.</span></label>
+      <label class="answer"><input type="radio" name="q5" value="b"><span>Aumentam as preempções e as oportunidades de resposta dos processos.</span></label>
+      <label class="answer"><input type="radio" name="q5" value="c"><span>Todos os processos passam a terminar no mesmo instante.</span></label>
+      <label class="answer"><input type="radio" name="q5" value="d"><span>A fila de prontos deixa de existir.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+
+  <article class="mission" data-answer="c" data-explanation="Com ambos disponíveis no tempo zero, o SJF não preemptivo escolhe primeiro P2, pois seu burst 2 é menor que o burst 6 de P1.">
+    <h3>Questão 6 · Interpretação de cenário</h3>
+    <p class="scenario">P1 e P2 chegam no tempo 0. P1 tem burst 6 e P2 tem burst 2. No SJF não preemptivo, qual é a ordem?</p>
+    <div class="answers">
+      <label class="answer"><input type="radio" name="q6" value="a"><span>P1 e P2 executam simultaneamente no mesmo núcleo.</span></label>
+      <label class="answer"><input type="radio" name="q6" value="b"><span>P1 primeiro, porque seu nome aparece antes.</span></label>
+      <label class="answer"><input type="radio" name="q6" value="c"><span>P2 primeiro e depois P1.</span></label>
+      <label class="answer"><input type="radio" name="q6" value="d"><span>A CPU permanece ociosa até que um terceiro processo chegue.</span></label>
+    </div>
+    <button type="button" class="quiz-check">Verificar</button><div class="feedback" aria-live="polite"></div>
+  </article>
+  <button type="button" class="btn" id="resetQuiz">Reiniciar quiz</button>
+</section>
+
+<section class="section" aria-labelledby="referencias">
+  <div class="section-label">07 · REFERÊNCIAS</div>
+  <h2 id="referencias">Base conceitual da aula</h2>
+  <ol class="references">
+    <li>TANENBAUM, Andrew S.; BOS, Herbert. <a href="https://www.pearson.com/en-us/subject-catalog/p/modern-operating-systems/P200000003295" target="_blank" rel="noopener"><em>Modern Operating Systems</em></a>. 5. ed. Pearson, 2023. Processos, threads e escalonamento.</li>
+    <li>SILBERSCHATZ, Abraham; GALVIN, Peter B.; GAGNE, Greg. <a href="https://bcs.wiley.com/he-bcs/Books?action=contents&amp;bcsId=11228&amp;itemId=1119320917" target="_blank" rel="noopener"><em>Operating System Concepts</em></a>. 10. ed. Wiley, 2018. Capítulo 5: CPU Scheduling.</li>
+    <li>STALLINGS, William. <a href="https://www.pearson.com/en-us/subject-catalog/p/StallingsOperating-Systems-Internals-and-Design-Principles-9thEdition/P200000003349" target="_blank" rel="noopener"><em>Operating Systems: Internals and Design Principles</em></a>. 9. ed. Pearson, 2018. Princípios, critérios e políticas de escalonamento.</li>
+    <li>RED HAT. <a href="https://www.redhat.com/pt-br/services/training/ex200-red-hat-certified-system-administrator-rhcsa-exam" target="_blank" rel="noopener">Objetivos do exame RHCSA EX200</a>. Operação de sistemas em execução e ajuste do escalonamento de processos.</li>
+    <li>LINUX FOUNDATION. <a href="https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/" target="_blank" rel="noopener">Certified Kubernetes Administrator — Domains &amp; Competencies</a>. Workloads, scheduling, monitoramento e troubleshooting.</li>
+  </ol>
+  <p class="metric-note">O simulador apresenta modelos didáticos simplificados. Escalonadores reais, como os empregados por Linux e Windows, combinam prioridades, classes, afinidade, múltiplos núcleos e outros mecanismos não representados aqui.</p>
+</section>
+
+<footer>
+  <span>IFSP · Prof. Cristiano Pessoa · Sistemas Operacionais</span>
+  <span>COMPREENDER · OBSERVAR · APLICAR</span>
+</footer>
+</main>
+
+<script>
+(function(){
+"use strict";
+
+var COLORS=["#22D3EE","#27C93F","#FFBD2E","#FF6B6B","#A78BFA","#F472B6","#FB923C","#2DD4BF"];
+var NAMES={fifo:"FIFO / FCFS",sjf:"SJF não preemptivo",rr:"Round Robin"};
+var SCENARIOS={
+  comboio:[{name:"P1",arrival:0,burst:10},{name:"P2",arrival:1,burst:4},{name:"P3",arrival:2,burst:2}],
+  intervalos:[{name:"P1",arrival:2,burst:3},{name:"P2",arrival:8,burst:2},{name:"P3",arrival:9,burst:4}],
+  iguais:[{name:"P1",arrival:0,burst:4},{name:"P2",arrival:0,burst:4},{name:"P3",arrival:1,burst:4},{name:"P4",arrival:1,burst:4}]
+};
+var processes=cloneScenario("comboio");
+var algorithm="rr";
+var quantum=2;
+var lastResult=null;
+var visibleIndex=0;
+var timer=null;
+var playing=false;
+
+var procBody=document.getElementById("procBody");
+var validation=document.getElementById("validation");
+var results=document.getElementById("results");
+var timeline=document.getElementById("timeline");
+var timelineAxis=document.getElementById("timelineAxis");
+var currentTime=document.getElementById("currentTime");
+var cpuState=document.getElementById("cpuState");
+var readyQueue=document.getElementById("readyQueue");
+var explanation=document.getElementById("explanation");
+var playPause=document.getElementById("playPause");
+
+function cloneScenario(key){
+  return SCENARIOS[key].map(function(p,i){
+    return {id:"proc-"+Date.now()+"-"+i+"-"+Math.random(),name:p.name,arrival:p.arrival,burst:p.burst,color:COLORS[i%COLORS.length],order:i};
+  });
+}
+
+function makeButton(text,className,label){
+  var b=document.createElement("button");
+  b.type="button";b.textContent=text;b.className=className;
+  if(label)b.setAttribute("aria-label",label);
+  return b;
+}
+
+function renderProcesses(){
+  procBody.innerHTML="";
+  processes.forEach(function(p,index){
+    var tr=document.createElement("tr");
+
+    var colorTd=document.createElement("td");
+    var dot=document.createElement("span");
+    dot.className="dot";dot.style.background=p.color;
+    colorTd.appendChild(dot);
+
+    var nameTd=document.createElement("td");
+    var nameInput=document.createElement("input");
+    nameInput.type="text";nameInput.maxLength=12;nameInput.value=p.name;
+    nameInput.setAttribute("aria-label","Nome do processo "+(index+1));
+    nameInput.dataset.field="name";nameInput.dataset.id=p.id;
+    nameTd.appendChild(nameInput);
+
+    var arrivalTd=document.createElement("td");
+    var arrivalInput=document.createElement("input");
+    arrivalInput.type="number";arrivalInput.min="0";arrivalInput.max="30";arrivalInput.step="1";arrivalInput.value=p.arrival;
+    arrivalInput.setAttribute("aria-label","Chegada de "+p.name);
+    arrivalInput.dataset.field="arrival";arrivalInput.dataset.id=p.id;
+    arrivalTd.appendChild(arrivalInput);
+
+    var burstTd=document.createElement("td");
+    var burstInput=document.createElement("input");
+    burstInput.type="number";burstInput.min="1";burstInput.max="20";burstInput.step="1";burstInput.value=p.burst;
+    burstInput.setAttribute("aria-label","Burst de "+p.name);
+    burstInput.dataset.field="burst";burstInput.dataset.id=p.id;
+    burstTd.appendChild(burstInput);
+
+    var actionTd=document.createElement("td");
+    var del=makeButton("Remover","icon-btn danger","Remover "+p.name);
+    del.dataset.remove=p.id;
+    del.disabled=processes.length===1;
+    actionTd.appendChild(del);
+
+    tr.appendChild(colorTd);tr.appendChild(nameTd);tr.appendChild(arrivalTd);tr.appendChild(burstTd);tr.appendChild(actionTd);
+    procBody.appendChild(tr);
+  });
+}
+
+function updateProcess(id,field,value){
+  var p=processes.find(function(item){return item.id===id;});
+  if(!p)return;
+  if(field==="name")p.name=value.trim();
+  else p[field]=Number(value);
+  clearResult("Dados alterados. Clique em Calcular e animar.");
+}
+
+function validate(){
+  var errors=[];
+  var names={};
+  if(processes.length<1)errors.push("Adicione pelo menos um processo.");
+  processes.forEach(function(p,index){
+    if(!p.name)errors.push("O processo "+(index+1)+" precisa de um nome.");
+    var key=p.name.toLocaleLowerCase("pt-BR");
+    if(p.name&&names[key])errors.push("Os nomes dos processos devem ser únicos.");
+    names[key]=true;
+    if(!Number.isInteger(p.arrival)||p.arrival<0||p.arrival>30)errors.push(p.name+": chegada deve ser um inteiro entre 0 e 30.");
+    if(!Number.isInteger(p.burst)||p.burst<1||p.burst>20)errors.push(p.name+": burst deve ser um inteiro entre 1 e 20.");
+  });
+  var total=processes.reduce(function(sum,p){return sum+(Number.isFinite(p.burst)?p.burst:0);},0);
+  if(total>120)errors.push("A soma dos bursts deve ser, no máximo, 120.");
+  validation.className="validation"+(errors.length?"":" ok");
+  validation.textContent=errors.length?errors[0]:"Dados válidos.";
+  return errors.length===0;
+}
+
+function prepared(){
+  return processes.map(function(p,i){
+    return {id:p.id,name:p.name,arrival:p.arrival,burst:p.burst,remaining:p.burst,first:null,finish:null,color:p.color,order:i};
+  });
+}
+
+function pushSlice(slices,p,start,end,queue,forceNew){
+  if(end<=start)return;
+  var previous=slices[slices.length-1];
+  var key=p?p.id:"idle";
+  if(!forceNew&&previous&&previous.key===key&&previous.end===start){
+    previous.end=end;
+    previous.queueEnd=queue.slice();
+  }else{
+    slices.push({key:key,name:p?p.name:"CPU ociosa",color:p?p.color:"#6b7280",start:start,end:end,queueStart:queue.slice(),queueEnd:queue.slice()});
+  }
+}
+
+function metricsFor(list){
+  return list.map(function(p){
+    return {id:p.id,name:p.name,color:p.color,arrival:p.arrival,burst:p.burst,finish:p.finish,
+      turnaround:p.finish-p.arrival,waiting:p.finish-p.arrival-p.burst,response:p.first-p.arrival,order:p.order};
+  }).sort(function(a,b){return a.order-b.order;});
+}
+
+function simulateFIFO(){
+  var list=prepared().sort(function(a,b){return a.arrival-b.arrival||a.order-b.order;});
+  var t=0,slices=[];
+  list.forEach(function(p){
+    if(t<p.arrival){pushSlice(slices,null,t,p.arrival,[]);t=p.arrival;}
+    p.first=t;
+    var queue=list.filter(function(x){return x.id!==p.id&&x.arrival<=t&&x.finish===null;}).map(function(x){return x.name;});
+    pushSlice(slices,p,t,t+p.burst,queue);
+    t+=p.burst;p.finish=t;p.remaining=0;
+  });
+  return {slices:slices,metrics:metricsFor(list)};
+}
+
+function simulateSJF(){
+  var list=prepared(),pending=list.slice().sort(function(a,b){return a.arrival-b.arrival||a.order-b.order;});
+  var ready=[],slices=[],t=0,finished=0;
+  while(finished<list.length){
+    while(pending.length&&pending[0].arrival<=t)ready.push(pending.shift());
+    if(!ready.length){
+      var next=pending[0].arrival;
+      pushSlice(slices,null,t,next,[]);
+      t=next;continue;
+    }
+    ready.sort(function(a,b){return a.burst-b.burst||a.arrival-b.arrival||a.order-b.order;});
+    var p=ready.shift();
+    p.first=t;
+    pushSlice(slices,p,t,t+p.burst,ready.map(function(x){return x.name;}));
+    t+=p.burst;p.finish=t;p.remaining=0;finished++;
+  }
+  return {slices:slices,metrics:metricsFor(list)};
+}
+
+function simulateRR(q){
+  var list=prepared(),pending=list.slice().sort(function(a,b){return a.arrival-b.arrival||a.order-b.order;});
+  var ready=[],slices=[],t=0,finished=0;
+  while(finished<list.length){
+    while(pending.length&&pending[0].arrival<=t)ready.push(pending.shift());
+    if(!ready.length){
+      var next=pending[0].arrival;
+      pushSlice(slices,null,t,next,[]);
+      t=next;continue;
+    }
+    var p=ready.shift();
+    if(p.first===null)p.first=t;
+    var duration=Math.min(q,p.remaining);
+    var queueAtStart=ready.map(function(x){return x.name;});
+    pushSlice(slices,p,t,t+duration,queueAtStart,true);
+    t+=duration;p.remaining-=duration;
+    while(pending.length&&pending[0].arrival<=t)ready.push(pending.shift());
+    if(p.remaining>0)ready.push(p);
+    else{p.finish=t;finished++;}
+  }
+  return {slices:slices,metrics:metricsFor(list)};
+}
+
+function simulate(kind,q){
+  if(kind==="fifo")return simulateFIFO();
+  if(kind==="sjf")return simulateSJF();
+  return simulateRR(q);
+}
+
+function averages(result){
+  var count=result.metrics.length;
+  return {
+    turnaround:result.metrics.reduce(function(s,m){return s+m.turnaround;},0)/count,
+    waiting:result.metrics.reduce(function(s,m){return s+m.waiting;},0)/count,
+    response:result.metrics.reduce(function(s,m){return s+m.response;},0)/count,
+    slices:result.slices.filter(function(s){return s.key!=="idle";}).length
+  };
+}
+
+function renderTimeline(result){
+  timeline.innerHTML="";timelineAxis.innerHTML="";
+  var total=result.slices[result.slices.length-1].end;
+  timeline.style.gridTemplateColumns="repeat("+Math.max(total,1)+", minmax(34px,1fr))";
+  timelineAxis.style.gridTemplateColumns="repeat("+Math.max(total,1)+", minmax(34px,1fr))";
+
+  result.slices.forEach(function(s,index){
+    var el=document.createElement("div");
+    el.className="slice"+(s.key==="idle"?" idle":"");
+    el.style.background=s.color;
+    el.style.gridColumn="span "+(s.end-s.start);
+    el.dataset.index=index;
+    el.setAttribute("aria-label",s.name+" do tempo "+s.start+" ao "+s.end);
+    el.textContent=s.name;
+    var times=document.createElement("span");
+    times.textContent=s.start+"–"+s.end;
+    el.appendChild(times);timeline.appendChild(el);
+  });
+
+  for(var t=0;t<total;t++){
+    var tick=document.createElement("div");
+    tick.className="tick";tick.textContent=t;timelineAxis.appendChild(tick);
+  }
+}
+
+function renderMetrics(result){
+  var body=document.getElementById("metricsBody"),foot=document.getElementById("metricsFoot");
+  body.innerHTML="";foot.innerHTML="";
+  result.metrics.forEach(function(m){
+    var tr=document.createElement("tr");
+    [m.name,m.arrival,m.burst,m.finish,m.turnaround,m.waiting,m.response].forEach(function(value,index){
+      var td=document.createElement("td");
+      if(index===0){
+        var wrap=document.createElement("span");wrap.className="process-name";
+        var dot=document.createElement("span");dot.className="dot";dot.style.background=m.color;
+        wrap.appendChild(dot);wrap.appendChild(document.createTextNode(String(value)));td.appendChild(wrap);
+      }else td.textContent=value;
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  var avg=averages(result),tr=document.createElement("tr");
+  var values=["Média","","","",avg.turnaround.toFixed(1),avg.waiting.toFixed(1),avg.response.toFixed(1)];
+  values.forEach(function(v){var td=document.createElement("td");td.textContent=v;tr.appendChild(td);});
+  foot.appendChild(tr);
+}
+
+function renderComparison(){
+  var kinds=["fifo","sjf","rr"];
+  var rows=kinds.map(function(kind){
+    var result=simulate(kind,quantum),avg=averages(result);
+    return {kind:kind,name:NAMES[kind]+(kind==="rr"?" (q="+quantum+")":""),avg:avg};
+  });
+  var minima={
+    turnaround:Math.min.apply(null,rows.map(function(r){return r.avg.turnaround;})),
+    waiting:Math.min.apply(null,rows.map(function(r){return r.avg.waiting;})),
+    response:Math.min.apply(null,rows.map(function(r){return r.avg.response;}))
+  };
+  var body=document.getElementById("comparisonBody");body.innerHTML="";
+  rows.forEach(function(row){
+    var tr=document.createElement("tr");
+    var vals=[row.name,row.avg.turnaround.toFixed(1),row.avg.waiting.toFixed(1),row.avg.response.toFixed(1),row.avg.slices];
+    vals.forEach(function(v,index){
+      var td=document.createElement("td");td.textContent=v;
+      if(index===1&&row.avg.turnaround===minima.turnaround)td.className="best";
+      if(index===2&&row.avg.waiting===minima.waiting)td.className="best";
+      if(index===3&&row.avg.response===minima.response)td.className="best";
+      tr.appendChild(td);
+    });
+    body.appendChild(tr);
+  });
+  document.getElementById("comparisonArea").hidden=false;
+}
+
+function setStep(index){
+  if(!lastResult)return;
+  var elements=timeline.querySelectorAll(".slice");
+  elements.forEach(function(el,i){el.classList.toggle("visible",i<=index);});
+  visibleIndex=index+1;
+  if(index<0){
+    currentTime.textContent="0";cpuState.textContent="—";readyQueue.textContent="—";
+    explanation.innerHTML="<strong>Leitura:</strong> inicie ou avance a animação.";
+    return;
+  }
+  var s=lastResult.slices[index];
+  currentTime.textContent=s.start+" → "+s.end;
+  cpuState.textContent=s.name;
+  readyQueue.textContent=s.queueStart.length?s.queueStart.join(" · "):"vazia";
+  if(s.key==="idle"){
+    explanation.innerHTML="<strong>CPU ociosa:</strong> nenhum processo estava pronto entre "+s.start+" e "+s.end+".";
+  }else if(algorithm==="rr"){
+    explanation.innerHTML="<strong>"+escapeHTML(s.name)+":</strong> executa por "+(s.end-s.start)+" unidade(s). Se ainda restar burst, retorna ao final da fila.";
+  }else{
+    explanation.innerHTML="<strong>"+escapeHTML(s.name)+":</strong> ocupa a CPU até concluir, pois "+NAMES[algorithm]+" é não preemptivo nesta simulação.";
+  }
+}
+
+function escapeHTML(value){
+  return String(value).replace(/[&<>"']/g,function(ch){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[ch];});
+}
+
+function stopAnimation(){
+  if(timer){clearTimeout(timer);timer=null;}
+  playing=false;playPause.textContent="▶";playPause.setAttribute("aria-label","Reproduzir animação");
+}
+
+function scheduleNext(){
+  if(!playing||!lastResult)return;
+  if(visibleIndex>=lastResult.slices.length){stopAnimation();return;}
+  setStep(visibleIndex);
+  timer=setTimeout(scheduleNext,Number(document.getElementById("speed").value));
+}
+
+function startAnimation(){
+  if(!lastResult)return;
+  if(visibleIndex>=lastResult.slices.length)setStep(-1);
+  playing=true;playPause.textContent="⏸";playPause.setAttribute("aria-label","Pausar animação");
+  scheduleNext();
+}
+
+function runSimulation(autoPlay){
+  stopAnimation();
+  if(!validate())return;
+  lastResult=simulate(algorithm,quantum);
+  results.hidden=false;
+  document.getElementById("algorithmName").textContent=NAMES[algorithm]+(algorithm==="rr"?" · quantum "+quantum:"");
+  renderTimeline(lastResult);renderMetrics(lastResult);
+  document.getElementById("comparisonArea").hidden=true;
+  setStep(-1);
+  results.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"});
+  if(autoPlay&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches)startAnimation();
+  else if(autoPlay){setStep(lastResult.slices.length-1);}
+}
+
+function clearResult(message){
+  stopAnimation();lastResult=null;results.hidden=true;
+  validation.className="validation";validation.textContent=message||"";
+}
+
+procBody.addEventListener("input",function(event){
+  var input=event.target;
+  if(!input.dataset.id)return;
+  updateProcess(input.dataset.id,input.dataset.field,input.value);
+  validate();
+});
+
+procBody.addEventListener("click",function(event){
+  var id=event.target.dataset.remove;
+  if(!id)return;
+  if(processes.length>1){
+    processes=processes.filter(function(p){return p.id!==id;});
+    processes.forEach(function(p,i){p.order=i;p.color=COLORS[i%COLORS.length];});
+    renderProcesses();clearResult("Processo removido.");validate();
+  }
+});
+
+document.getElementById("addProcess").addEventListener("click",function(){
+  if(processes.length>=8){validation.textContent="O limite é de oito processos.";return;}
+  var used={};processes.forEach(function(p){used[p.name.toLowerCase()]=true;});
+  var number=1;while(used[("P"+number).toLowerCase()])number++;
+  var index=processes.length;
+  processes.push({id:"proc-"+Date.now()+"-"+Math.random(),name:"P"+number,arrival:index,burst:3,color:COLORS[index%COLORS.length],order:index});
+  renderProcesses();clearResult("Processo adicionado.");validate();
+});
+
+document.querySelectorAll(".scenario").forEach(function(button){
+  button.addEventListener("click",function(){
+    processes=cloneScenario(button.dataset.scenario);
+    renderProcesses();clearResult("Cenário carregado.");validate();
+  });
+});
+
+document.querySelectorAll(".algorithm").forEach(function(button){
+  button.addEventListener("click",function(){
+    algorithm=button.dataset.algo;
+    document.querySelectorAll(".algorithm").forEach(function(b){
+      var active=b===button;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));
+    });
+    document.getElementById("quantumBox").hidden=algorithm!=="rr";
+    clearResult("Algoritmo alterado. Calcule novamente.");
+  });
+});
+
+document.querySelectorAll(".quantum").forEach(function(button){
+  button.addEventListener("click",function(){
+    quantum=Number(button.dataset.q);
+    document.querySelectorAll(".quantum").forEach(function(b){
+      var active=b===button;b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));
+    });
+    clearResult("Quantum alterado. Calcule novamente.");
+  });
+});
+
+document.getElementById("simulate").addEventListener("click",function(){runSimulation(true);});
+document.getElementById("compare").addEventListener("click",function(){
+  if(!lastResult)runSimulation(false);
+  if(lastResult&&validate()){renderComparison();document.getElementById("comparisonArea").scrollIntoView({behavior:"smooth",block:"nearest"});}
+});
+document.getElementById("reset").addEventListener("click",function(){
+  processes=cloneScenario("comboio");algorithm="rr";quantum=2;
+  document.querySelectorAll(".algorithm").forEach(function(b){var a=b.dataset.algo==="rr";b.classList.toggle("active",a);b.setAttribute("aria-pressed",String(a));});
+  document.querySelectorAll(".quantum").forEach(function(b){var a=b.dataset.q==="2";b.classList.toggle("active",a);b.setAttribute("aria-pressed",String(a));});
+  document.getElementById("quantumBox").hidden=false;
+  renderProcesses();clearResult("Exemplo restaurado.");validate();
+});
+
+document.getElementById("restartAnimation").addEventListener("click",function(){stopAnimation();setStep(-1);startAnimation();});
+playPause.addEventListener("click",function(){if(playing)stopAnimation();else startAnimation();});
+document.getElementById("nextStep").addEventListener("click",function(){
+  stopAnimation();
+  if(lastResult&&visibleIndex<lastResult.slices.length)setStep(visibleIndex);
+});
+document.getElementById("speed").addEventListener("input",function(){
+  if(playing){clearTimeout(timer);timer=setTimeout(scheduleNext,Number(this.value));}
+});
+
+document.querySelectorAll(".demo-launch").forEach(function(button){
+  button.addEventListener("click",function(){
+    processes=cloneScenario(button.dataset.scenario||"comboio");
+    algorithm=button.dataset.algo||"rr";
+    quantum=Number(button.dataset.q)||2;
+
+    document.querySelectorAll(".algorithm").forEach(function(item){
+      var active=item.dataset.algo===algorithm;
+      item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));
+    });
+    document.querySelectorAll(".quantum").forEach(function(item){
+      var active=Number(item.dataset.q)===quantum;
+      item.classList.toggle("active",active);item.setAttribute("aria-pressed",String(active));
+    });
+    document.getElementById("quantumBox").hidden=algorithm!=="rr";
+    renderProcesses();validate();
+
+    if(button.dataset.action==="compare"){
+      runSimulation(false);renderComparison();
+    }else runSimulation(true);
+  });
+});
+
+var missions=Array.from(document.querySelectorAll(".mission"));
+var quizScore=document.getElementById("quizScore");
+
+function updateQuizScore(){
+  var completed=missions.filter(function(mission){return mission.dataset.solved==="true";}).length;
+  quizScore.textContent=completed+" de "+missions.length+" concluídas";
+  if(completed===missions.length)quizScore.textContent="✓ "+completed+" de "+missions.length+" concluídas";
+}
+
+missions.forEach(function(mission){
+  var check=mission.querySelector(".quiz-check");
+  var feedback=mission.querySelector(".feedback");
+  check.addEventListener("click",function(){
+    var selected=mission.querySelector("input[type=radio]:checked");
+    mission.querySelectorAll(".answer").forEach(function(answer){answer.classList.remove("correct","wrong");});
+    if(!selected){
+      feedback.className="feedback show err";
+      feedback.textContent="Selecione uma alternativa antes de verificar.";return;
+    }
+    if(selected.value===mission.dataset.answer){
+      selected.closest(".answer").classList.add("correct");
+      feedback.className="feedback show ok";
+      feedback.textContent="✓ "+mission.dataset.explanation;
+      mission.dataset.solved="true";
+      mission.querySelectorAll("input").forEach(function(input){input.disabled=true;});
+      check.disabled=true;check.textContent="Concluída";
+      updateQuizScore();
+    }else{
+      selected.closest(".answer").classList.add("wrong");
+      feedback.className="feedback show err";
+      feedback.textContent="Ainda não. Retome a explicação ou execute a demonstração correspondente e tente novamente.";
+    }
+  });
+});
+
+document.getElementById("resetQuiz").addEventListener("click",function(){
+  missions.forEach(function(mission){
+    delete mission.dataset.solved;
+    mission.querySelectorAll("input").forEach(function(input){input.checked=false;input.disabled=false;});
+    mission.querySelectorAll(".answer").forEach(function(answer){answer.classList.remove("correct","wrong");});
+    var check=mission.querySelector(".quiz-check");check.disabled=false;check.textContent="Verificar";
+    var feedback=mission.querySelector(".feedback");feedback.className="feedback";feedback.textContent="";
+  });
+  updateQuizScore();
+});
+
+renderProcesses();
+validate();
+updateQuizScore();
+})();
+</script>
+</body>
+</html>
