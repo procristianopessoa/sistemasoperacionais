@@ -3,29 +3,36 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    
-    <!-- SEO & Metadados -->
+
     <title>Sistemas Operacionais · IFSP</title>
-    <meta name="description" content="Disciplina de Sistemas Operacionais do IFSP. Conectando fundamentos, arquitetura, Linux, Windows, Web, IoT e infraestrutura moderna.">
+    <meta
+      name="description"
+      content="Disciplina de Sistemas Operacionais do IFSP. Fundamentos, processos, sistemas de arquivos, Linux, Windows e infraestrutura moderna."
+    >
     <meta name="author" content="Prof. Cristiano Pessoa">
 
-    <!-- Open Graph / Redes Sociais -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Sistemas Operacionais · IFSP">
-    <meta property="og:description" content="Compreender · Observar · Aplicar. Guia e trilha de estudo de Sistemas Operacionais.">
+    <meta
+      property="og:description"
+      content="Compreender · Observar · Aplicar. Guia e trilha de estudo de Sistemas Operacionais."
+    >
     <meta property="og:locale" content="pt_BR">
 
-    <!-- Favicon & Estilos -->
     <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="assets/css/site.css">
   </head>
+
   <body>
     <header class="site-header">
       <div class="header-container">
-        <small class="institution">INSTITUTO FEDERAL DE SÃO PAULO · CIÊNCIA DA COMPUTAÇÃO</small>
+        <small class="institution">
+          INSTITUTO FEDERAL DE SÃO PAULO · CIÊNCIA DA COMPUTAÇÃO
+        </small>
+
         <h1>Sistemas<br>Operacionais</h1>
         <p class="tagline">Compreender · Observar · Aplicar</p>
-        
+
         <nav aria-label="Navegação principal">
           <ul>
             <li><a href="#trilha">Trilha</a></li>
@@ -38,32 +45,35 @@
 
     <main id="main-content">
       <section class="hero">
-        <h2>Hardware só se torna plataforma quando o sistema operacional organiza seus recursos.</h2>
-        <p>Uma disciplina que conecta fundamentos, arquitetura, Linux, Windows, Web, IoT e infraestrutura moderna.</p>
+        <h2>
+          Hardware só se torna plataforma quando o sistema operacional
+          organiza seus recursos.
+        </h2>
+        <p>
+          Uma disciplina que conecta fundamentos, processos, armazenamento,
+          Linux, Windows, Web, IoT e infraestrutura moderna.
+        </p>
       </section>
 
       <section id="trilha" aria-labelledby="trilha-title">
         <small class="section-tag">TRILHA DE ESTUDO</small>
         <h2 id="trilha-title">Do problema à prática</h2>
-        
+
         <div class="grid">
-          <a href="aulas/historia-sistemas-operacionais/" class="card-link">
-            <span><b>01</b> História e evolução</span>
+          <a href="aula_01.html" class="card-link">
+            <span><b>01</b> Introdução aos Sistemas Operacionais</span>
           </a>
-          <a href="aulas/fundamentos/" class="card-link">
-            <span><b>02</b> Fundamentos do SO</span>
+
+          <a href="aula02/index.html" class="card-link">
+            <span><b>02</b> Escalonamento e concorrência</span>
           </a>
-          <a href="aulas/arquitetura-kernel/" class="card-link">
-            <span><b>03</b> Arquitetura e kernel</span>
+
+          <a href="aula04" class="card-link">
+            <span><b>04</b> Processos no Sistema Operacional</span>
           </a>
-          <a href="aulas/processos-threads/" class="card-link">
-            <span><b>04</b> Processos, threads e serviços</span>
-          </a>
-          <a href="aulas/shell-terminal-kernel/" class="card-link">
-            <span><b>05</b> Shell, terminal e kernel</span>
-          </a>
-          <a href="#" class="card-link">
-            <span><b>06</b> Escalonamento e concorrência</span>
+
+          <a href="aula05/" class="card-link">
+            <span><b>05</b> Sistemas de Arquivos</span>
           </a>
         </div>
       </section>
@@ -71,20 +81,27 @@
       <section id="laboratorios" aria-labelledby="lab-title">
         <small class="section-tag">LABORATÓRIOS</small>
         <h2 id="lab-title">Aprender observando o sistema</h2>
-        
+
         <div class="feature">
           <div class="feature-content">
-            <h3>Shell, Terminal e Kernel</h3>
-            <p>Tutorial técnico, terminal simulado e desafio progressivo com evidências Linux.</p>
+            <h3>Processos, monitoramento e administração</h3>
+            <p>
+              Entenda PID, monitoramento, sinais, prioridades e decisões de
+              administração de processos.
+            </p>
           </div>
-          <a class="button" href="aulas/shell-terminal-kernel/">Abrir aula</a>
+
+          <a class="button" href="aula04">Abrir aula</a>
         </div>
       </section>
 
       <section id="materiais" aria-labelledby="materiais-title">
         <small class="section-tag">MATERIAIS</small>
-        <h2 id="materiais-title">Slides, guias e referências</h2>
-        <p>Materiais de estudo, atividades e roteiros acompanham cada módulo da trilha.</p>
+        <h2 id="materiais-title">Conteúdos interativos e referências</h2>
+        <p>
+          Cada aula reúne explicações, animações, laboratórios seguros,
+          interações e desafios contextualizados.
+        </p>
       </section>
     </main>
 
