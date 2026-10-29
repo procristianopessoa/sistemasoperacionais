@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Trilha de Sistemas Operacionais do IFSP: processos, sistemas de arquivos, redes, cloud e atividade diagnóstica.">
+  <meta name="author" content="Prof. Cristiano Pessoa">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Sistemas Operacionais · IFSP">
+  <meta property="og:description" content="Estude Sistemas Operacionais por uma trilha temática ou por um mapa circular de aulas.">
+  <meta property="og:locale" content="pt_BR">
+  <title>Sistemas Operacionais · IFSP</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --page: #f4f8fa;
+      --paper: #ffffff;
+      --ink: #173043;
+      --muted: #526b7b;
+      --line: #d9e5eb;
+      --soft: #e9f3f6;
+      --blue: #0066b3;
+      --deep: #133c56;
+      --teal: #087e83;
+      --focus: #f7ab32;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--page); color: var(--ink); font: 400 16px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: inherit; }
+    button { font: inherit; }
+    :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+    [hidden] { display: none !important; }
+    .skip-link { position: absolute; left: 14px; top: -70px; z-index: 20; padding: 10px 14px; border-radius: 7px; background: var(--deep); color: #fff; }
+    .skip-link:focus { top: 10px; }
+    .container { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+    .site-header { background: var(--paper); border-bottom: 1px solid var(--line); }
+    .header-row { min-height: 84px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: inline-flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none; font-size: .88rem; font-weight: 650; }
+    .brand-mark { display: grid; place-items: center; flex: none; width: 39px; height: 39px; border-radius: 10px; background: var(--blue); color: #fff; font-weight: 750; letter-spacing: -.05em; }
+    .primary-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 23px; }
+    .primary-nav a { color: var(--muted); text-decoration: none; font-size: .88rem; font-weight: 600; }
+    .primary-nav a:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 5px; }
+    .intro { padding: 52px 0 35px; display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(240px, .8fr); gap: 24px; align-items: center; }
+    .eyebrow { color: var(--teal); font-size: .74rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 8px 0 11px; font-size: clamp(2.1rem, 4vw, 3.3rem); line-height: 1.11; letter-spacing: -.045em; }
+    .intro p { margin: 0; max-width: 680px; color: var(--muted); font-size: 1.06rem; }
+    .intro-note { padding: 19px 22px; border: 1px solid #c9e0e2; border-radius: 15px; background: #e8f3f1; }
+    .intro-note strong { display: block; margin-bottom: 4px; font-size: .93rem; }
+    .intro-note span { color: #375d64; font-size: .87rem; }
+    .view-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 8px; width: fit-content; max-width: 100%; margin-bottom: 24px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); }
+    .view-tabs button { min-height: 44px; padding: 10px 18px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-weight: 650; cursor: pointer; }
+    .view-tabs button[aria-selected="true"] { background: var(--deep); color: #fff; }
+    .view-tabs button:hover:not([aria-selected="true"]) { background: var(--soft); color: var(--deep); }
+    .panel { min-height: 550px; }
+    .group { margin-bottom: 27px; }
+    .group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 11px; }
+    .group-head h2 { margin: 0; font-size: 1.33rem; line-height: 1.25; }
+    .group-head span { color: var(--muted); font-size: .83rem; }
+    .lesson-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .lesson-card { display: flex; align-items: center; gap: 14px; min-height: 81px; padding: 15px 17px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); text-decoration: none; transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease; }
+    .lesson-card:hover { transform: translateY(-2px); border-color: #80b9c9; box-shadow: 0 8px 24px #14456112; }
+    .lesson-num { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 10px; background: var(--soft); color: var(--blue); font-size: .9rem; font-weight: 750; }
+    .lesson-copy { display: grid; gap: 1px; min-width: 0; }
+    .lesson-title { font-size: .98rem; font-weight: 680; line-height: 1.25; }
+    .lesson-subtitle { color: var(--muted); font-size: .78rem; line-height: 1.35; }
+    .lesson-arrow { margin-left: auto; color: var(--teal); font-size: 1.23rem; }
+    .activity-card { border-color: #a4d0d0; background: #e6f3f2; }
+    .activity-card .lesson-num { background: #d2e9e6; color: #08757a; }
+    .activity-card .lesson-arrow { font-size: .94rem; font-weight: 700; }
+    .wheel-panel { border: 1px solid var(--line); border-radius: 20px; background: var(--paper); padding: 30px; }
+    .wheel-head h2 { margin: 0 0 4px; font-size: 1.38rem; }
+    .wheel-head p { margin: 0; color: var(--muted); font-size: .88rem; }
+    .wheel-layout { display: grid; grid-template-columns: minmax(320px, 1.12fr) minmax(270px, .88fr); align-items: center; gap: 32px; margin-top: 20px; }
+    .wheel { position: relative; width: min(100%, 465px); aspect-ratio: 1; margin: auto; border-radius: 50%; background: conic-gradient(from -22.5deg, #cce7e8 0 44deg, #fff 44deg 45deg, #d8ecf2 45deg 89deg, #fff 89deg 90deg, #d9e8eb 90deg 134deg, #fff 134deg 135deg, #cbe6ec 135deg 179deg, #fff 179deg 180deg, #cce7e8 180deg 224deg, #fff 224deg 225deg, #d8ecf2 225deg 269deg, #fff 269deg 270deg, #d9e8eb 270deg 314deg, #fff 314deg 315deg, #cbe6ec 315deg 359deg, #fff 359deg 360deg); box-shadow: 0 14px 36px #123d5c19; }
+    .wheel::before { content: ""; position: absolute; inset: 27%; border-radius: 50%; background: var(--paper); }
+    .wheel button { cursor: pointer; }
+    .wheel-node { position: absolute; z-index: 2; left: var(--x); top: var(--y); transform: translate(-50%, -50%); display: grid; place-items: center; width: 51px; height: 51px; border: 1px solid #b7d4dc; border-radius: 50%; background: #fff; color: var(--ink); font-size: .89rem; font-weight: 750; box-shadow: 0 2px 9px #163b4c20; }
+    .wheel-node:hover, .wheel-node[aria-pressed="true"] { border-color: var(--blue); background: var(--blue); color: #fff; }
+    .wheel-center { position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; justify-content: center; width: 34%; aspect-ratio: 1; border: 1px solid var(--line); border-radius: 50%; background: #fff; color: var(--ink); text-align: center; font-size: .82rem; font-weight: 700; }
+    .wheel-center strong { color: var(--teal); font-size: clamp(1.35rem, 3vw, 2.1rem); line-height: 1; }
+    .wheel-center small { font-size: .71rem; font-weight: 500; }
+    .wheel-center:hover, .wheel-center[aria-pressed="true"] { border-color: var(--teal); box-shadow: 0 0 0 3px #c4e9e6; }
+    .wheel-detail { align-self: center; padding: 25px; border: 1px solid var(--line); border-radius: 15px; background: var(--page); }
+    .wheel-detail .detail-kicker { color: var(--teal); font-size: .73rem; font-weight: 750; letter-spacing: .07em; text-transform: uppercase; }
+    .wheel-detail h3 { margin: 10px 0; font-size: clamp(1.35rem, 2.5vw, 1.8rem); line-height: 1.2; }
+    .wheel-detail p { min-height: 82px; margin: 0 0 16px; color: var(--muted); font-size: .92rem; }
+    .open-link { display: inline-block; padding: 11px 16px; border-radius: 8px; background: var(--blue); color: #fff; font-size: .85rem; font-weight: 700; text-decoration: none; }
+    .open-link:hover { background: #07598e; }
+    .wheel-mobile { display: none; }
+    .support { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; margin: 31px 0 42px; }
+    .support article { padding: 20px; border: 1px solid var(--line); border-radius: 13px; background: var(--paper); }
+    .support h2 { margin: 0 0 7px; font-size: 1.1rem; }
+    .support p { margin: 0; color: var(--muted); font-size: .86rem; }
+    .support a { color: var(--blue); font-weight: 700; text-underline-offset: 3px; }
+    footer { border-top: 1px solid var(--line); padding: 22px 0 32px; color: var(--muted); font-size: .82rem; }
+    @media (max-width: 790px) {
+      .intro { grid-template-columns: 1fr; padding-top: 36px; }
+      .wheel-layout { grid-template-columns: 1fr; gap: 18px; }
+      .wheel-detail p { min-height: 0; }
+    }
+    @media (max-width: 590px) {
+      .container { width: min(100% - 28px, 1120px); }
+      .header-row { min-height: 72px; }
+      .brand span:last-child { font-size: .77rem; }
+      .primary-nav { gap: 11px; }
+      .primary-nav a { font-size: .77rem; }
+      .primary-nav a:nth-child(2) { display: none; }
+      .intro { padding-top: 28px; }
+      .intro-note { padding: 15px; }
+      .view-tabs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+      .view-tabs button { padding: 9px 8px; font-size: .85rem; }
+      .lesson-grid, .support { grid-template-columns: 1fr; }
+      .group-head { align-items: start; }
+      .group-head span { text-align: right; }
+      .wheel-panel { padding: 19px; }
+      .wheel { display: none; }
+      .wheel-mobile { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .wheel-mobile a { display: flex; align-items: center; min-height: 45px; padding: 9px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--page); font-size: .83rem; font-weight: 650; text-decoration: none; }
+      .wheel-detail { display: none; }
+    }
+    @media (max-width: 360px) { .wheel-mobile { grid-template-columns: 1fr; } .brand span:last-child { max-width: 155px; line-height: 1.1; } }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .lesson-card { transition: none; } }
+  .wheel-section + .wheel-section { margin-top: 40px; padding-top: 32px; border-top: 2px solid var(--line); } .wheel-networks { background: conic-gradient(from -18deg, #cce7e8 0deg 35deg, #fff 35deg 36deg, #d8ecf2 36deg 71deg, #fff 71deg 72deg, #d9e8eb 72deg 107deg, #fff 107deg 108deg, #cbe6ec 108deg 143deg, #fff 143deg 144deg, #cce7e8 144deg 179deg, #fff 179deg 180deg, #d8ecf2 180deg 215deg, #fff 215deg 216deg, #d9e8eb 216deg 251deg, #fff 251deg 252deg, #cbe6ec 252deg 287deg, #fff 287deg 288deg, #cce7e8 288deg 323deg, #fff 323deg 324deg, #d8ecf2 324deg 359deg, #fff 359deg 360deg); } .wheel-networks .wheel-center strong { font-size: 1.45rem; }
+</style>
+<link rel="stylesheet" href="assets/css/so-theme.css"><script src="assets/js/so-theme.js" defer></script></head>
+<body>
+  <a class="skip-link" href="#trilha">Ir para as aulas</a>
+  <header class="site-header">
+    <div class="container header-row">
+      <a class="brand" href="index.html" aria-label="Página inicial da disciplina de Sistemas Operacionais"><span class="brand-mark" aria-hidden="true">IF</span><span>IFSP · Sistemas Operacionais</span></a>
+      <nav class="primary-nav" aria-label="Navegação da página">
+        <a href="#trilha">Aulas</a>
+        <a href="#laboratorios">Laboratórios</a>
+        <a href="aula09/index.html">Atividade 09</a>
+      </nav>
+    </div>
+  </header>
+  <main class="container">
+    <section class="intro" aria-labelledby="page-title">
+      <div><div class="eyebrow">Compreender · Observar · Aplicar</div><h1 id="page-title">Explore o sistema por dentro.</h1><p>Da execução de processos ao armazenamento em cloud: escolha como navegar pelas aulas e experimente cada conceito.</p></div>
+      <aside class="intro-note"><strong>Uma trilha, duas maneiras de navegar</strong><span>Veja as aulas por temas ou percorra o mapa circular. A seção 1 reúne as aulas 01 a 09. A seção 2 inicia os estudos de redes em Linux, macOS e Windows Server.</span></aside>
+    </section>
+    <section id="trilha" aria-label="Trilha de estudo">
+      <div class="view-tabs" role="tablist" aria-label="Modo de navegação das aulas">
+        <button id="tab-trilha" role="tab" aria-selected="true" aria-controls="panel-trilha" tabindex="0" type="button">Trilha por temas</button>
+        <button id="tab-roda" role="tab" aria-selected="false" aria-controls="panel-roda" tabindex="-1" type="button">Roda de aulas</button>
+      </div>
+      <div class="panel" id="panel-trilha" role="tabpanel" aria-labelledby="tab-trilha">
+        <div class="group">
+          <div class="group-head"><h2>Fundamentos e processos</h2><span>Aulas 01 a 04</span></div>
+          <div class="lesson-grid">
+            <a class="lesson-card" data-num="01" data-track="Fundamentos" data-summary="Compreenda a relação entre comandos, terminal, shell e kernel." href="aula_01.html"><span class="lesson-num">01</span><span class="lesson-copy"><span class="lesson-title">Shell, Terminal e Kernel</span><span class="lesson-subtitle">Fundamentos do sistema operacional</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="02" data-track="Processos" data-summary="Observe a disputa pela CPU e como o sistema escolhe o próximo processo." href="aula02/index.html"><span class="lesson-num">02</span><span class="lesson-copy"><span class="lesson-title">Processos e Escalonamento</span><span class="lesson-subtitle">Execução e decisões do sistema</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="03" data-track="Processos" data-summary="Identifique processos, PID, PPID, estados e a árvore de execução." href="aula04/index.html#s2"><span class="lesson-num">03</span><span class="lesson-copy"><span class="lesson-title">Processos no Sistema Operacional</span><span class="lesson-subtitle">Identificação e monitoramento · conteúdo na Aula 04</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="04" data-track="Processos" data-summary="Aplique monitoramento, sinais e prioridades em situações de administração." href="aula04/index.html"><span class="lesson-num">04</span><span class="lesson-copy"><span class="lesson-title">Processos no Sistema Operacional</span><span class="lesson-subtitle">Administração e desafio prático</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><h2>Arquivos, rede e cloud</h2><span>Aulas 05 a 08</span></div>
+          <div class="lesson-grid">
+            <a class="lesson-card" data-num="05" data-track="Sistemas de arquivos" data-summary="Explore caminhos, metadados, volumes e o acesso persistente aos dados." href="aula05/index.html"><span class="lesson-num">05</span><span class="lesson-copy"><span class="lesson-title">Sistemas de Arquivos</span><span class="lesson-subtitle">Estrutura, caminhos e persistência</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="06" data-track="Sistemas de arquivos" data-summary="Compare formatos por dispositivo, compatibilidade e recuperação." href="aula06/index.html"><span class="lesson-num">06</span><span class="lesson-copy"><span class="lesson-title">Compatibilidade e Sistemas de Arquivos</span><span class="lesson-subtitle">Formatos, dispositivos e recuperação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="07" data-track="Rede e permissões" data-summary="Analise como protocolo, identidade e permissões determinam o acesso a arquivos remotos." href="aula07/index.html"><span class="lesson-num">07</span><span class="lesson-copy"><span class="lesson-title">Arquivos em Rede, Cloud e Permissões</span><span class="lesson-subtitle">SMB, NFS, identidade e autorização</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+            <a class="lesson-card" data-num="08" data-track="Cloud" data-summary="Escolha entre armazenamento em bloco, arquivo e objeto conforme a carga." href="aula08/index.html"><span class="lesson-num">08</span><span class="lesson-copy"><span class="lesson-title">Armazenamento em Cloud</span><span class="lesson-subtitle">Bloco, arquivo, objeto e recuperação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><h2>Aplicar o conhecimento</h2><span>Atividade 09</span></div>
+          <a class="lesson-card activity-card" data-num="09" data-track="Integração" data-summary="Atividade de integração das aulas 01 a 08, em preparação." href="aula09/index.html"><span class="lesson-num">09</span><span class="lesson-copy"><span class="lesson-title">Atividade Diagnóstica 01–08</span><span class="lesson-subtitle">Atividade de integração · Em preparação</span></span><span class="lesson-arrow">Abrir ↗</span></a>
+        </div>
+<div class="group"><div class="group-head"><h2>Redes Linux</h2><span>Aulas 10 a 13</span></div><div class="lesson-grid"><a class="lesson-card" data-num="10" data-track="Redes Linux" data-summary="Identificar interfaces, endereços IPv4/IPv6, gateway e rotas. Aula em preparação." href="aula10/index.html"><span class="lesson-num">10</span><span class="lesson-copy"><span class="lesson-title">Interfaces, endereçamento e rotas</span><span class="lesson-subtitle">Redes Linux · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="11" data-track="Redes Linux" data-summary="Distinguir falhas de enlace, endereçamento, roteamento e resolução de nomes. Aula em preparação." href="aula11/index.html"><span class="lesson-num">11</span><span class="lesson-copy"><span class="lesson-title">DNS e diagnóstico de conectividade</span><span class="lesson-subtitle">Redes Linux · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="12" data-track="Redes Linux" data-summary="Relacionar serviços, portas, SSH e registros do sistema. Aula em preparação." href="aula12/index.html"><span class="lesson-num">12</span><span class="lesson-copy"><span class="lesson-title">Serviços de rede e acesso remoto</span><span class="lesson-subtitle">Redes Linux · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="13" data-track="Redes Linux" data-summary="Integrar compartilhamentos, permissões e regras de acesso. Aula em preparação." href="aula13/index.html"><span class="lesson-num">13</span><span class="lesson-copy"><span class="lesson-title">Compartilhamento e proteção da rede</span><span class="lesson-subtitle">Redes Linux · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a></div></div><div class="group"><div class="group-head"><h2>Redes macOS</h2><span>Aulas 14 a 15</span></div><div class="lesson-grid"><a class="lesson-card" data-num="14" data-track="Redes macOS" data-summary="Explorar os ajustes de rede do macOS, endereçamento, DNS e rotas. Aula em preparação." href="aula14/index.html"><span class="lesson-num">14</span><span class="lesson-copy"><span class="lesson-title">Interfaces, Wi-Fi e diagnóstico</span><span class="lesson-subtitle">Redes macOS · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="15" data-track="Redes macOS" data-summary="Relacionar compartilhamento de arquivos, acesso remoto e interoperabilidade. Aula em preparação." href="aula15/index.html"><span class="lesson-num">15</span><span class="lesson-copy"><span class="lesson-title">Compartilhamento e integração em rede</span><span class="lesson-subtitle">Redes macOS · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a></div></div><div class="group"><div class="group-head"><h2>Redes Windows Server</h2><span>Aulas 16 a 19</span></div><div class="lesson-grid"><a class="lesson-card" data-num="16" data-track="Redes Windows Server" data-summary="Planejar interfaces, endereçamento estável, nomes e topologia do servidor. Aula em preparação." href="aula16/index.html"><span class="lesson-num">16</span><span class="lesson-copy"><span class="lesson-title">Planejamento e configuração de rede</span><span class="lesson-subtitle">Redes Windows Server · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="17" data-track="Redes Windows Server" data-summary="Relacionar resolução de nomes e distribuição de configurações aos clientes. Aula em preparação." href="aula17/index.html"><span class="lesson-num">17</span><span class="lesson-copy"><span class="lesson-title">DNS e DHCP</span><span class="lesson-subtitle">Redes Windows Server · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="18" data-track="Redes Windows Server" data-summary="Organizar domínio, usuários, grupos e políticas para estações. Aula em preparação." href="aula18/index.html"><span class="lesson-num">18</span><span class="lesson-copy"><span class="lesson-title">Active Directory e políticas de grupo</span><span class="lesson-subtitle">Redes Windows Server · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a><a class="lesson-card" data-num="19" data-track="Redes Windows Server" data-summary="Integrar SMB, permissões de compartilhamento, NTFS e auditoria. Aula em preparação." href="aula19/index.html"><span class="lesson-num">19</span><span class="lesson-copy"><span class="lesson-title">Arquivos, permissões e diagnóstico integrado</span><span class="lesson-subtitle">Redes Windows Server · Em preparação</span></span><span class="lesson-arrow" aria-hidden="true">↗</span></a></div></div>
+<div class="group"><div class="group-head"><h2>Validar a interoperabilidade</h2><span>Atividade 20</span></div><a class="lesson-card activity-card" data-num="20" data-track="Avaliação integradora" data-summary="Avalie propostas envolvendo redes, sistemas de arquivos e permissões em um, dois ou três sistemas operacionais. Justifique cada conclusão com testes e evidências. Avaliação em preparação." href="aula20/index.html"><span class="lesson-num">20</span><span class="lesson-copy"><span class="lesson-title">Avaliação de conhecimentos · Interoperabilidade</span><span class="lesson-subtitle">Linux, macOS e Windows Server · Em preparação</span></span><span class="lesson-arrow">Abrir ↗</span></a></div>
+      </div>
+      <div class="panel wheel-panel" id="panel-roda" role="tabpanel" aria-labelledby="tab-roda" hidden>
+        <section class="wheel-section" data-first="01"><div class="wheel-head"><h2>Seção 1 · Fundamentos, arquivos e cloud</h2><p>Selecione um número para ver o tema e abrir a aula. A atividade fica no centro.</p></div>
+        <div class="wheel-layout">
+          <nav class="wheel" aria-label="Seleção circular das aulas">
+            <button class="wheel-node" style="--x:50%;--y:9%" data-lesson="01" type="button">01</button>
+            <button class="wheel-node" style="--x:79%;--y:21%" data-lesson="02" type="button">02</button>
+            <button class="wheel-node" style="--x:91%;--y:50%" data-lesson="03" type="button">03</button>
+            <button class="wheel-node" style="--x:79%;--y:79%" data-lesson="04" type="button">04</button>
+            <button class="wheel-node" style="--x:50%;--y:91%" data-lesson="05" type="button">05</button>
+            <button class="wheel-node" style="--x:21%;--y:79%" data-lesson="06" type="button">06</button>
+            <button class="wheel-node" style="--x:9%;--y:50%" data-lesson="07" type="button">07</button>
+            <button class="wheel-node" style="--x:21%;--y:21%" data-lesson="08" type="button">08</button>
+            <button class="wheel-center" data-lesson="09" type="button"><strong>09</strong><span>Atividade</span><small>Integração</small></button>
+          </nav>
+          <nav id="wheel-mobile" class="wheel-mobile" aria-label="Lista das aulas no celular"></nav>
+          <div class="wheel-detail" aria-live="polite">
+            <div class="detail-kicker" id="detail-track"></div>
+            <h3 id="detail-title"></h3>
+            <p id="detail-summary"></p>
+            <a class="open-link" id="detail-link" href="aula_01.html">Abrir aula ↗</a>
+          </div>
+        </div>
+</section><section class="wheel-section" data-first="10"><div class="wheel-head"><h2>Seção 2 · Redes nos sistemas operacionais</h2><p>Aulas 10–13: Linux · 14–15: macOS · 16–19: Windows Server. Atividade 20 no centro: avaliação de interoperabilidade. Sequência em preparação.</p></div><div class="wheel-layout"><nav class="wheel wheel-networks" aria-label="Seleção circular das aulas de redes"><button class="wheel-node" style="--x:50.00%;--y:9.00%" data-lesson="10" type="button">10</button><button class="wheel-node" style="--x:74.10%;--y:16.83%" data-lesson="11" type="button">11</button><button class="wheel-node" style="--x:88.99%;--y:37.33%" data-lesson="12" type="button">12</button><button class="wheel-node" style="--x:88.99%;--y:62.67%" data-lesson="13" type="button">13</button><button class="wheel-node" style="--x:74.10%;--y:83.17%" data-lesson="14" type="button">14</button><button class="wheel-node" style="--x:50.00%;--y:91.00%" data-lesson="15" type="button">15</button><button class="wheel-node" style="--x:25.90%;--y:83.17%" data-lesson="16" type="button">16</button><button class="wheel-node" style="--x:11.01%;--y:62.67%" data-lesson="17" type="button">17</button><button class="wheel-node" style="--x:11.01%;--y:37.33%" data-lesson="18" type="button">18</button><button class="wheel-node" style="--x:25.90%;--y:16.83%" data-lesson="19" type="button">19</button><button class="wheel-center" data-lesson="20" type="button"><strong>20</strong><span>Avaliação</span><small>Interoperabilidade</small></button></nav><nav class="wheel-mobile" aria-label="Aulas de redes no celular"></nav><div class="wheel-detail" aria-live="polite"><div class="detail-kicker"></div><h3></h3><p></p><a class="open-link" href="aula10/index.html">Ver planejamento ↗</a></div></div></section>
+      </div>
+    </section>
+    <div class="support">
+      <article id="laboratorios"><h2>Aprender observando o sistema</h2><p>Os exemplos e desafios estão dentro de cada aula. Comece pela <a href="aula04/index.html">administração de processos</a> ou pelos <a href="aula07/index.html">arquivos em rede</a>.</p></article>
+      <article id="materiais"><h2>Continuar o estudo</h2><p>As aulas reúnem explicações, animações e aplicações de Linux, Windows, rede e cloud. Navegue pela trilha acima no seu ritmo.</p></article>
+    </div>
+  </main>
+  <footer><div class="container">© 2026 IFSP · Prof. Cristiano Pessoa</div></footer>
+  <script>
+    (function () {
+      "use strict";
+      var cards = Array.from(document.querySelectorAll(".lesson-card"));
+      var lessons = {};
+      cards.forEach(function (card) {
+        lessons[card.dataset.num] = {
+          title: card.querySelector(".lesson-title").textContent.trim(),
+          subtitle: card.querySelector(".lesson-subtitle").textContent.trim(),
+          track: card.dataset.track,
+          summary: card.dataset.summary,
+          href: card.getAttribute("href")
+        };
+      });
+
+      document.querySelectorAll('.wheel-section').forEach(function(section) {
+        var nodes = Array.from(section.querySelectorAll('button[data-lesson]'));
+        function select(num) {
+          var lesson = lessons[num];
+          nodes.forEach(function(node) { node.setAttribute('aria-pressed', String(node.dataset.lesson === num)); });
+          section.querySelector('.detail-kicker').textContent = 'Aula ' + num + ' · ' + lesson.track;
+          section.querySelector('.wheel-detail h3').textContent = lesson.title;
+          section.querySelector('.wheel-detail p').textContent = lesson.summary;
+          var link = section.querySelector('.open-link'); link.href = lesson.href;
+          link.textContent = Number(num) >= 10 ? 'Ver planejamento ↗' : 'Abrir aula ↗';
+          link.setAttribute('aria-label', (Number(num) >= 10 ? 'Ver planejamento da aula ' : 'Abrir aula ') + num + ': ' + lesson.title);
+        }
+        nodes.forEach(function(node) {
+          var lesson = lessons[node.dataset.lesson];
+          node.setAttribute('aria-label', 'Aula ' + node.dataset.lesson + ': ' + lesson.title);
+          node.addEventListener('click', function() { select(node.dataset.lesson); });
+          var link = document.createElement('a'); link.href = lesson.href;
+          link.textContent = 'Aula ' + node.dataset.lesson + ' · ' + lesson.title;
+          section.querySelector('.wheel-mobile').appendChild(link);
+        });
+        select(section.dataset.first);
+      });
+
+      var tabTrilha = document.getElementById("tab-trilha");
+      var tabRoda = document.getElementById("tab-roda");
+      var panelTrilha = document.getElementById("panel-trilha");
+      var panelRoda = document.getElementById("panel-roda");
+      var tabs = [tabTrilha, tabRoda];
+      function activate(view, remember) {
+        var roda = view === "roda";
+        tabTrilha.setAttribute("aria-selected", roda ? "false" : "true");
+        tabRoda.setAttribute("aria-selected", roda ? "true" : "false");
+        tabTrilha.tabIndex = roda ? -1 : 0;
+        tabRoda.tabIndex = roda ? 0 : -1;
+        panelTrilha.hidden = roda;
+        panelRoda.hidden = !roda;
+        if (remember) {
+          try { localStorage.setItem("so-home-view", roda ? "roda" : "trilha"); } catch (error) {}
+        }
+      }
+      tabTrilha.addEventListener("click", function () { activate("trilha", true); });
+      tabRoda.addEventListener("click", function () { activate("roda", true); });
+      tabs.forEach(function (tab, index) {
+        tab.addEventListener("keydown", function (event) {
+          var next = null;
+          if (event.key === "ArrowRight") next = tabs[(index + 1) % 2];
+          if (event.key === "ArrowLeft") next = tabs[(index + 1) % 2];
+          if (event.key === "Home") next = tabs[0];
+          if (event.key === "End") next = tabs[1];
+          if (!next) return;
+          event.preventDefault();
+          next.focus();
+          activate(next === tabRoda ? "roda" : "trilha", true);
+        });
+      });
+      var saved = null;
+      try { saved = localStorage.getItem("so-home-view"); } catch (error) {}
+      activate(saved === "roda" ? "roda" : "trilha", false);
+    })();
+  </script>
+</body>
+</html>
