@@ -60,3 +60,7 @@ button { cursor: pointer; background: #dff7fb; color: #075669; font-weight: 800;
 .score { font-weight: 800; color: #075669; }
 footer { padding: 30px 0; color: var(--cinza); font-size: .9rem; }
 @media (max-width: 760px) { .bar .wrap { padding: 12px 0; align-items: flex-start; flex-direction: column; } .hero { padding: 68px 0 54px; } .grid, .wide { grid-template-columns: 1fr; } .wrap { width: min(100% - 28px, 1120px); } }
+/* Ajustes de contraste da Aula 06 no tema escuro. */
+:root[data-so-theme="dark"] :is(h1, h2, h3) { color: var(--so-ink); }
+:root[data-so-theme="dark"] .table { background: var(--so-paper); color: var(--so-ink); }
+:root[data-so-theme="dark"] .chips span { background: var(--so-soft); color: var(--so-ink); }

@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Aula interativa sobre dados, sistemas de arquivos, montagem, blocos, compatibilidade e journaling.">
+    <title>Dados, Armazenamento e Sistemas de Arquivos · IFSP</title>
+    <link rel="stylesheet" href="aula.css">
+  <link rel="stylesheet" href="../../assets/css/so-theme.css"><script src="../../assets/js/so-theme.js" defer></script></head>
+  <body>
+    <header class="bar">
+      <div class="wrap">
+        <a class="brand" href="../../index.html#trilha">Sistemas <b>Operacionais</b></a>
+        <nav aria-label="Nesta aula">
+          <a href="#carga">Dados</a>
+          <a href="#montagem">Montagem</a>
+          <a href="#blocos">Blocos</a>
+          <a href="#integridade">Integridade</a>
+          <a href="#desafio">Desafio</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap">
+          <p class="eyebrow">SISTEMAS OPERACIONAIS · AULA 06</p>
+          <h1>Se todos mexem com dados, os dados são sempre iguais?</h1>
+          <p class="lead">
+            Uma foto RAW, uma transação de banco de dados, um pendrive de apresentação
+            e um vídeo de 12 GiB são bytes — mas não pedem a mesma embalagem, o mesmo
+            caminho, a mesma unidade de alocação ou a mesma estratégia de recuperação.
+          </p>
+          <div class="chips">
+            <span>granularidade</span>
+            <span>metadados</span>
+            <span>montagem</span>
+            <span>blocos</span>
+            <span>compatibilidade</span>
+            <span>journaling</span>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <p class="eyebrow">A PERGUNTA QUE ORGANIZA A AULA</p>
+          <h2>Transportar, guardar e encontrar dados são problemas diferentes.</h2>
+          <div class="wide">
+            <div class="call">
+              <strong>Uma analogia útil</strong>
+              <p>
+                Soja, suco concentrado ou petróleo podem viajar a granel e ser
+                fracionados no destino. Isso reduz embalagens repetidas, mas reduz a
+                separação imediata entre cada unidade. Produtos de varejo fazem o
+                movimento oposto: cada item é identificado, embalado e acessível
+                individualmente.
+              </p>
+            </div>
+            <div class="card">
+              <span class="tag">O LIMITE DA ANALOGIA</span>
+              <h3>RAW não quer dizer “menor”.</h3>
+              <p>
+                Uma foto RAW costuma ocupar mais espaço que JPEG porque preserva mais
+                informação e normalmente não usa a mesma compressão. Aqui, “a granel”
+                significa menos fragmentação e menos embalagem repetida; não uma regra
+                universal de tamanho.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="carga">
+        <div class="wrap">
+          <p class="eyebrow">01 · GRANULARIDADE</p>
+          <h2>Uma carga única e muitos pequenos pacotes produzem custos diferentes.</h2>
+          <p class="intro">
+            Em computação, arquivos pequenos, objetos, blocos, registros e páginas de
+            banco de dados têm metadados, índices e operações de I/O próprios. Separar
+            tudo ajuda a localizar e controlar; agrupar pode reduzir operações e
+            favorecer leitura sequencial. O sistema operacional precisa equilibrar essas
+            escolhas.
+          </p>
+          <img class="gif" src="gifs/01-carga-ou-pacotes.gif" alt="Comparação entre uma carga contínua e muitos pacotes de dados.">
+          <div class="grid">
+            <article class="card">
+              <span class="tag">FLUXO CONTÍNUO</span>
+              <h3>Leitura sequencial</h3>
+              <p>Vídeo, backup e cargas analíticas podem beneficiar-se de operações grandes e previsíveis.</p>
+            </article>
+            <article class="card">
+              <span class="tag">ITENS INDIVIDUAIS</span>
+              <h3>Acesso seletivo</h3>
+              <p>Documentos, objetos web e registros precisam ser encontrados, autorizados ou alterados separadamente.</p>
+            </article>
+            <article class="card">
+              <span class="tag">DECISÃO</span>
+              <h3>O workload manda</h3>
+              <p>Não se escolhe tecnologia apenas pelo tamanho: frequência de escrita, concorrência e recuperação também importam.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="montagem">
+        <div class="wrap">
+          <p class="eyebrow">02 · O DISPOSITIVO APARECEU</p>
+          <h2>Reconhecer o hardware não significa conseguir ler os arquivos.</h2>
+          <p class="intro">
+            Ao conectar um SSD externo, o sistema pode reconhecer o controlador USB e
+            enxergar seus blocos, mas ainda precisa identificar a partição e possuir um
+            driver capaz de interpretar o sistema de arquivos gravado nela. É por isso
+            que um volume APFS pode existir para o Windows sem se tornar navegável, e um
+            volume ext4 não vira automaticamente uma unidade utilizável no macOS.
+          </p>
+          <img class="gif" src="gifs/02-dispositivo-e-montagem.gif" alt="Etapas entre conectar um dispositivo e tornar seus arquivos acessíveis.">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Camada</th>
+                <th>Pergunta que resolve</th>
+                <th>Exemplo de falha</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Dispositivo</td>
+                <td>O hardware foi detectado?</td>
+                <td>Cabo, energia ou controlador USB.</td>
+              </tr>
+              <tr>
+                <td>Partição</td>
+                <td>Há um volume identificável?</td>
+                <td>Partição ausente, corrompida ou não inicializada.</td>
+              </tr>
+              <tr>
+                <td>Sistema de arquivos</td>
+                <td>O SO sabe ler esse formato?</td>
+                <td>APFS, ext4 ou formato proprietário sem suporte nativo.</td>
+              </tr>
+              <tr>
+                <td>Montagem e acesso</td>
+                <td>Onde os arquivos aparecem para o usuário?</td>
+                <td>Volume não montado, sem letra ou sem permissão.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <p class="eyebrow">03 · MONTAR É DAR UM LUGAR NA ÁRVORE</p>
+          <h2>Windows faz isso de modo familiar; Linux e BSD deixam a ideia mais visível.</h2>
+          <div class="wide">
+            <div class="card">
+              <span class="tag">WINDOWS</span>
+              <h3>Uma letra também é ponto de montagem.</h3>
+              <p>
+                Ao receber <code>E:</code>, o volume se torna acessível em uma raiz.
+                O Windows também pode montá-lo dentro de uma pasta vazia de um volume
+                NTFS, sem usar outra letra.
+              </p>
+            </div>
+            <div class="card">
+              <span class="tag">LINUX / BSD</span>
+              <h3>Uma árvore única.</h3>
+              <p>
+                O volume é associado a um diretório, por exemplo
+                <code>/media/cristiano/USB</code>. Ambientes gráficos podem fazer isso
+                automaticamente; em servidores, a montagem costuma ser explícita e
+                registrada em configuração.
+              </p>
+            </div>
+          </div>
+          <div class="term">
+            <b>Observação segura · Windows PowerShell</b>
+            <pre>Get-Disk
+Get-Partition
+Get-Volume
+mountvol</pre>
+          </div>
+          <div class="term">
+            <b>Observação segura · Linux / WSL</b>
+            <pre>lsblk -f
+findmnt
+df -T
+cat /proc/mounts | head</pre>
+          </div>
+          <div class="call warn">
+            <strong>Antes de usar mount ou formatar</strong>
+            <p>
+              Os comandos acima apenas observam. Não execute comandos de formatação,
+              partição ou montagem manual em um dispositivo cuja origem e conteúdo você
+              não conhece.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <p class="eyebrow">04 · COMPATIBILIDADE NÃO É DESEMPENHO</p>
+          <h2>Um pendrive de troca e o disco de um servidor resolvem problemas opostos.</h2>
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Formato</th>
+                <th>Escolha inicial</th>
+                <th>O que observar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>FAT32</strong></td>
+                <td>firmware, câmeras e mídia legada</td>
+                <td>compatibilidade ampla; arquivo individual limitado a 4 GiB.</td>
+              </tr>
+              <tr>
+                <td><strong>exFAT</strong></td>
+                <td>SSD ou pendrive entre Windows e macOS</td>
+                <td>arquivos grandes e portabilidade; não é substituto de um volume de servidor.</td>
+              </tr>
+              <tr>
+                <td><strong>NTFS / ReFS</strong></td>
+                <td>Windows e workloads corporativos</td>
+                <td>ACL, recuperação e compatibilidade com a plataforma Windows.</td>
+              </tr>
+              <tr>
+                <td><strong>ext4 / XFS</strong></td>
+                <td>Linux e servidores</td>
+                <td>semântica POSIX, journal e comportamento a validar com o SGBD e o armazenamento.</td>
+              </tr>
+              <tr>
+                <td><strong>APFS</strong></td>
+                <td>Mac atual e SSD interno</td>
+                <td>integração ao macOS, snapshots e criptografia no ecossistema Apple.</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="call">
+            <strong>Nota de vocabulário</strong>
+            <p>
+              EFS é criptografia de arquivo/diretório sobre NTFS; não é um sistema de
+              arquivos concorrente de NTFS, ext4 ou APFS. ReiserFS entra como referência
+              histórica e de ambientes legados, não como escolha para um novo projeto.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="blocos">
+        <div class="wrap">
+          <p class="eyebrow">05 · TAMANHO DE BLOCO</p>
+          <h2>O arquivo que o usuário vê não ocupa o disco de forma contínua por mágica.</h2>
+          <p class="intro">
+            Sistemas de arquivos trabalham com unidades de alocação. Muitos blocos
+            pequenos podem reduzir o desperdício em milhares de arquivos diminutos, mas
+            aumentam metadados. Blocos maiores reduzem a quantidade de unidades para
+            arquivos volumosos, mas podem desperdiçar espaço quando o conteúdo é pequeno.
+          </p>
+          <img class="gif" src="gifs/03-tamanho-de-bloco.gif" alt="Comparação visual entre blocos pequenos e grandes.">
+          <div class="grid">
+            <article class="card">
+              <span class="tag">ARQUIVO PEQUENO</span>
+              <h3>Espaço interno</h3>
+              <p>Um arquivo de 1 KiB em uma unidade de 64 KiB consome uma unidade inteira, mesmo sem preenchê-la.</p>
+            </article>
+            <article class="card">
+              <span class="tag">ARQUIVO GRANDE</span>
+              <h3>Metadados e I/O</h3>
+              <p>Unidades maiores significam menos referências para percorrer em uma carga sequencial muito grande.</p>
+            </article>
+            <article class="card">
+              <span class="tag">BANCO DE DADOS</span>
+              <h3>Páginas não são blocos</h3>
+              <p>O SGBD possui páginas, cache e log próprios. O ajuste do sistema de arquivos é apenas uma parte da arquitetura.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section id="integridade">
+        <div class="wrap">
+          <p class="eyebrow">06 · INTEGRIDADE</p>
+          <h2>Journal reduz inconsistência estrutural. Backup permite voltar no tempo.</h2>
+          <p class="intro">
+            Quando uma alteração começa, o sistema precisa evitar que uma queda de
+            energia deixe diretórios, nomes e metadados em um estado impossível. O
+            journaling registra a intenção e ajuda a recuperar operações interrompidas.
+            Ele não recupera um arquivo apagado por engano nem substitui cópias de
+            segurança testadas.
+          </p>
+          <img class="gif" src="gifs/05-journal-e-recuperacao.gif" alt="Fluxo de journal e recuperação após uma falha.">
+          <div class="wide">
+            <div class="call">
+              <strong>Para uma aplicação transacional</strong>
+              <p>
+                Banco de dados, sistema de pagamento e ERP precisam considerar o journal
+                do sistema de arquivos, o log de transações do SGBD, a ordenação de
+                escrita e a confiabilidade do armazenamento.
+              </p>
+            </div>
+            <div class="card">
+              <span class="tag">PERGUNTA PROFISSIONAL</span>
+              <h3>“Qual é mais rápido?” não basta.</h3>
+              <p>
+                Para comparar NTFS, ext4, XFS ou APFS, defina SO, SGBD, tamanho do banco,
+                padrão de leitura/escrita, SSD/controladora, RPO e RTO. Depois meça.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <p class="eyebrow">07 · DECIDIR É JUSTIFICAR</p>
+          <h2>O formato certo muda conforme o trabalho.</h2>
+          <img class="gif" src="gifs/04-decisao-por-cenario.gif" alt="Matriz de escolha de sistemas de arquivos por cenário.">
+          <div class="tool">
+            <label for="cenario"><strong>Escolha um cenário:</strong></label>
+            <select id="cenario">
+              <option value="camera">Cartão de câmera ou mídia para firmware</option>
+              <option value="externo">SSD externo com vídeos de 12 GiB entre Mac e Windows</option>
+              <option value="windows">Servidor Windows com SQL Server</option>
+              <option value="linux">Servidor Linux com SGBD</option>
+              <option value="mac">Mac atual com SSD interno</option>
+            </select>
+            <button type="button" id="analisar">Analisar escolha</button>
+            <div id="resultado" class="result" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="quiz">
+        <div class="wrap">
+          <p class="eyebrow">08 · VERIFIQUE SUA LEITURA</p>
+          <h2>Diagnosticar antes de escolher.</h2>
+          <div class="tool">
+            <p><strong>Um pendrive aparece no Gerenciador de Discos, mas não abre no Explorador. Qual investigação vem antes de formatar?</strong></p>
+            <label><input type="radio" name="pergunta" value="0"> Concluir que o dispositivo está vazio.</label>
+            <label><input type="radio" name="pergunta" value="1"> Verificar partição, formato reconhecido, ponto de montagem/letra e permissões.</label>
+            <label><input type="radio" name="pergunta" value="0"> Aumentar o tamanho do bloco sem observar o volume.</label>
+            <button type="button" id="verificar">Verificar resposta</button>
+            <p id="feedback" class="score" aria-live="polite"></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="desafio">
+        <div class="wrap">
+          <p class="eyebrow">09 · DESAFIO FINAL</p>
+          <div class="call">
+            <h2>Você é responsável pela movimentação de dados de um laboratório.</h2>
+            <p>
+              Justifique uma escolha para cinco situações: câmera de laboratório,
+              pendrive de entrega, SSD externo com vídeos, servidor Windows com SQL
+              Server e servidor Linux com PostgreSQL. Para cada uma, responda: qual
+              formato começaria avaliando; qual limitação ou risco precisa ser validado;
+              e qual evidência coletaria antes de colocar em produção.
+            </p>
+          </div>
+          <div class="steps">
+            <div class="step">Separe portabilidade, desempenho, permissões e recuperação: elas não são a mesma decisão.</div>
+            <div class="step">Use os comandos de observação para identificar volumes e pontos de montagem locais.</div>
+            <div class="step">Para cenário de banco de dados, escreva uma hipótese e uma forma segura de medi-la.</div>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="wrap">
+          <p class="eyebrow">REFERÊNCIAS PARA CONTINUAR</p>
+          <p class="intro">
+            Apple Disk Utility — formatos de volume; Microsoft Learn — NTFS, pontos de
+            montagem e SQL Server storage; Linux Kernel Documentation — ext4/JBD2;
+            Tanenbaum e Bos, <em>Modern Operating Systems</em>; Silberschatz, Galvin e
+            Gagne, <em>Operating System Concepts</em>.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="wrap">Aula 06 · Dados, armazenamento e sistemas de arquivos · IFSP</div>
+    </footer>
+
+    <script>
+      const cenarios = {
+        camera: [
+          "FAT32 como ponto de partida",
+          "Firmware e câmeras frequentemente privilegiam compatibilidade. Valide o limite de 4 GiB por arquivo antes de gravar vídeo."
+        ],
+        externo: [
+          "exFAT como ponto de partida",
+          "Para troca moderna entre macOS e Windows com arquivos grandes, exFAT é uma escolha prática. Ainda assim, valide backup e o tipo de uso."
+        ],
+        windows: [
+          "NTFS ou ReFS no ecossistema Windows",
+          "A decisão precisa respeitar a matriz de suporte do SQL Server e considerar logs, crescimento de arquivos, SSD/controladora e recuperação."
+        ],
+        linux: [
+          "ext4 ou XFS como hipótese inicial",
+          "O melhor resultado depende do SGBD e do workload. Meça com dados representativos; não desative mecanismos de integridade apenas para obter um número maior."
+        ],
+        mac: [
+          "APFS como escolha nativa",
+          "O formato é integrado ao macOS e ao armazenamento moderno da Apple. Não o trate como mídia universal para troca com Windows."
+        ]
+      };
+
+      const seletor = document.querySelector("#cenario");
+      const resultado = document.querySelector("#resultado");
+      function analisar() {
+        const escolha = cenarios[seletor.value];
+        resultado.innerHTML = "<strong>" + escolha[0] + "</strong><br>" + escolha[1];
+      }
+      document.querySelector("#analisar").addEventListener("click", analisar);
+      analisar();
+
+      let tentativas = 0;
+      document.querySelector("#verificar").addEventListener("click", () => {
+        const marcada = document.querySelector('input[name="pergunta"]:checked');
+        const feedback = document.querySelector("#feedback");
+        if (marcada && marcada.value === "1") {
+          feedback.textContent = "Correto. Diagnóstico vem antes de uma ação destrutiva.";
+          return;
+        }
+        tentativas += 1;
+        feedback.textContent = tentativas < 3
+          ? "Ainda não. Releia as quatro camadas: dispositivo, partição, formato e montagem."
+          : "Dica final: aparecer como hardware não prova que o sistema de arquivos está acessível.";
+      });
+    </script>
+  </body>
+</html>
