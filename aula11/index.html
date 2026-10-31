@@ -46,6 +46,7 @@
     pre{background:#101820;color:#f4f4f1}
 
 .historical-figure{margin:28px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.historical-figure img{display:block;max-width:100%;max-height:460px;width:auto;height:auto;margin:auto;border-radius:7px}.historical-figure figcaption{padding:12px 3px 0;color:var(--muted);font-size:.9rem}.historical-figure a{color:var(--accent)}
+.revisao-questao{margin:18px 0;padding:20px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.revisao-questao fieldset{border:0;margin:0;padding:0;min-width:0}.revisao-questao legend{font-weight:700;color:var(--ink);margin-bottom:12px}.revisao-alternativa{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;margin:5px 0;border:1px solid var(--line);border-radius:7px;cursor:pointer}.revisao-alternativa input{margin-top:.35em;accent-color:var(--accent)}.revisao-alternativa:focus-within{outline:2px solid var(--accent);outline-offset:2px}.revisao-questao button{margin-top:12px;padding:10px 16px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:var(--panel2);font-weight:700;cursor:pointer}.revisao-feedback{margin:12px 0 0;line-height:1.5}.revisao-feedback:empty{display:none}.revisao-feedback[data-resultado="correto"]{color:var(--accent)}.revisao-feedback[data-resultado="incorreto"]{color:var(--gold)}
 </style>
 </head>
 
@@ -77,7 +78,6 @@
         <a href="#bloco-3">03 · Automação e nuvem</a>
         <a href="#bloco-4">04 · Aplicação e revisão</a>
         <a href="#pratica-doze">Exercícios de revisão</a>
-        <a href="#macos">Prática simulada de macOS</a>
         
       </nav>
     </aside>
@@ -837,7 +837,7 @@ Get-ADGroupMember -Identity "GG-Lab-Financeiro"</code></pre>
             a função da máquina e devem seguir um roteiro próprio.
           </p>
         </details>
-      <h3>Da floresta à permissão na pasta</h3><p>O AD DS organiza identidades e recursos de forma hierárquica. Em um exemplo empresarial, uma floresta reúne um ou mais domínios; dentro de um domínio, unidades organizacionais ajudam a organizar objetos e administrar políticas. <strong>Grupos de segurança</strong> reúnem contas para facilitar a concessão de acesso; unidades organizacionais não substituem esses grupos.</p><p>Imagine Ana no grupo <code>Financeiro</code> e uma pasta de relatório em um volume NTFS do servidor. O administrador concede ao grupo o acesso necessário. Quando Ana usa um compartilhamento SMB, o servidor analisa a identidade e as regras do compartilhamento e da pasta. Pertencer a uma OU ou conseguir entrar no domínio, por si só, não garante que ela possa ler ou gravar o arquivo.</p><p>Para validar o cenário, teste uma conta que deve ter acesso e outra que deve ser negada, pelo caminho de rede. Alterações de grupo podem depender da atualização da sessão ou do token. Na nuvem, Entra ID e sincronização de identidades complementam esse cenário, mas não copiam automaticamente as ACLs NTFS locais.</p><h3>A ferramenta em uma situação real</h3><p>Na árvore da demonstração, observe o domínio, as unidades organizacionais e os usuários. Use-a como ponto de partida para localizar grupos e analisar como uma identidade pode receber acesso aos recursos.</p><figure class="visual-between"><img src="animacoes/console-ad-exemplo.gif" alt="Demonstração do console Usuários e Computadores do Active Directory, com árvore de domínio e propriedades de usuário." loading="lazy"><figcaption>Exemplo fornecido para a aula. As abas Office 365 e Mailbox exibidas pertencem à extensão de terceiros Easy365Manager e não são funções nativas do AD DS. O vídeo não demonstra diretamente permissões NTFS.</figcaption></figure><p>Uma <strong>floresta</strong> pode conter um ou mais domínios. Grupos reúnem identidades para facilitar a administração; o acesso a uma pasta em NTFS depende das permissões aplicáveis ao recurso. O desenho deve ser validado com testes, incluindo acesso permitido e negado.</p></section>
+      <h3>Da floresta à permissão na pasta</h3><p>O AD DS organiza identidades e recursos de forma hierárquica. Em um exemplo empresarial, uma floresta reúne um ou mais domínios; dentro de um domínio, unidades organizacionais ajudam a organizar objetos e administrar políticas. <strong>Grupos de segurança</strong> reúnem contas para facilitar a concessão de acesso; unidades organizacionais não substituem esses grupos.</p><p>Imagine Ana no grupo <code>Financeiro</code> e uma pasta de relatório em um volume NTFS do servidor. O administrador concede ao grupo o acesso necessário. Quando Ana usa um compartilhamento SMB, o servidor analisa a identidade e as regras do compartilhamento e da pasta. Pertencer a uma OU ou conseguir entrar no domínio, por si só, não garante que ela possa ler ou gravar o arquivo.</p><p>Para validar o cenário, teste uma conta que deve ter acesso e outra que deve ser negada, pelo caminho de rede. Alterações de grupo podem depender da atualização da sessão ou do token. Na nuvem, Entra ID e sincronização de identidades complementam esse cenário, mas não copiam automaticamente as ACLs NTFS locais.</p><figure id="objetos-ad" class="visual-between"><span class="kicker">ANIMAÇÃO · OBJETOS DO ACTIVE DIRECTORY</span><img src="animacoes/objetos-ad-ampliado.gif" alt="Animação ilustrando uma floresta com um domínio, unidades organizacionais, usuários, grupos e uma pasta NTFS." loading="lazy"><figcaption>A floresta pode reunir domínios; as OUs organizam objetos e grupos de segurança ajudam a conceder permissões. Triângulo e círculos são formas didáticas, não símbolos oficiais da Microsoft.</figcaption></figure><h3>A ferramenta em uma situação real</h3><p>Na árvore da demonstração, observe o domínio, as unidades organizacionais e os usuários. Use-a como ponto de partida para localizar grupos e analisar como uma identidade pode receber acesso aos recursos.</p><figure class="visual-between"><img src="animacoes/console-ad-exemplo.gif" alt="Demonstração do console Usuários e Computadores do Active Directory, com árvore de domínio e propriedades de usuário." loading="lazy"><figcaption>Exemplo fornecido para a aula. As abas Office 365 e Mailbox exibidas pertencem à extensão de terceiros Easy365Manager e não são funções nativas do AD DS. O vídeo não demonstra diretamente permissões NTFS.</figcaption></figure><p>Uma <strong>floresta</strong> pode conter um ou mais domínios. Grupos reúnem identidades para facilitar a administração; o acesso a uma pasta em NTFS depende das permissões aplicáveis ao recurso. O desenho deve ser validado com testes, incluindo acesso permitido e negado.</p></section>
 <figure id="animacao-ad" class="visual-between"><span class="kicker">ANIMAÇÃO · OBSERVE O CENÁRIO</span><img src="animacoes/identidade-ad.gif" alt="Animação do ciclo de uma conta, grupos, autenticação, autorização e mudança de departamento." loading="lazy"><figcaption>Grupos, acesso a arquivos e políticas de estação têm papéis distintos; mudanças podem exigir atualização de sessão.</figcaption></figure>
 
       <!-- =====================================================
@@ -1340,7 +1340,7 @@ Get-Process |
           
         </details>
       </section>
-<figure id="animacao-hibrida" class="visual-between"><span class="kicker">ANIMAÇÃO · IDENTIDADE HÍBRIDA</span><img src="animacoes/identidade-hibrida-remotion.gif" alt="Topologia ilustrativa de estação, Active Directory local, Entra Connect, Microsoft Entra ID e AD FS opcional." loading="lazy"><figcaption>AD DS, sincronização de identidades, autenticação na nuvem e federação cumprem papéis diferentes. AD FS e Web Application Proxy são opcionais neste cenário.</figcaption></figure>
+<figure id="animacao-hibrida" class="visual-between"><span class="kicker">ANIMAÇÃO · IDENTIDADE HÍBRIDA</span><img src="animacoes/identidade-hibrida-remotion-v4.gif" alt="Topologia ilustrativa de estação, Active Directory local, Entra Connect, Microsoft Entra ID e AD FS opcional." loading="lazy"><figcaption>AD DS, sincronização de identidades, autenticação na nuvem e federação cumprem papéis diferentes. AD FS e Web Application Proxy são opcionais neste cenário.</figcaption></figure>
 
 
       <!-- =====================================================
@@ -1360,7 +1360,7 @@ Get-Process |
             Abrir checklist de diagnóstico seguro
           </summary>
 
-          <h3>Diagnóstico: evidências e limites</h3>
+          <h3>Diagnóstico no Windows Server: evidências e limites</h3>
 
           <ol>
             <li>
@@ -1406,96 +1406,148 @@ Get-Process |
            DESAFIO FINAL
            ===================================================== -->
 
-      <section id="exercicios" class="lesson-section">
-        <p class="kicker">PRÁTICA E REVISÃO</p>
-
-        <h2>
-          Desafio final: a próxima decisão da Aurora
-        </h2>
-
-        <p>
-          A Aurora tem matriz, filial, funcionários remotos,
-          pastas departamentais e um ERP que depende de Windows.
-          Não há orçamento nem requisitos completos disponíveis.
-        </p>
-
-        <ol class="tasks">
-          <li>
-            Qual problema concreto Windows Server e AD
-            resolvem neste cenário?
-          </li>
-
-          <li>
-            Explique por que Windows 2000 não significa
-            “ausência de permissões”.
-          </li>
-
-          <li>
-            Qual foi a mudança de postura discutida para 2003?
-          </li>
-
-          <li>
-            Por que 55,1% de novas licenças não significa
-            55,1% de todas as instalações?
-          </li>
-
-          <li>
-            Desenhe conta, grupo, recurso e decisão de acesso.
-            Separe autenticação de autorização.
-          </li>
-
-          <li>
-            Compare versão do SO e nível funcional.
-          </li>
-
-          <li>
-            Escolha um recurso de 2016 em diante e associe-o
-            a uma necessidade.
-          </li>
-
-          <li>
-            Explique por que WSL não substitui PowerShell.
-          </li>
-
-          <li>
-            Liste uma razão para manter um serviço local
-            e uma para avaliar uma alternativa gerenciada.
-          </li>
-
-          <li>
-            Quais dados de custo, compatibilidade e risco faltam
-            antes de recomendar uma migração?
-          </li>
-        </ol>
-
-        <details>
-          <summary>Orientação para entrega</summary>
-
-          <p>
-            Entregue uma página com:
-          </p>
-
-          <ul>
-            <li>Decisão proposta.</li>
-            <li>Justificativa.</li>
-            <li>Riscos.</li>
-            <li>Informações faltantes.</li>
-          </ul>
-
-          <p>
-            Separe fato documentado, resultado observado
-            e hipótese.
-            Não inclua senhas ou dados pessoais.
-          </p>
-        </details>
-      </section>
+      <section id="exercicios" class="lesson-section"><p class="kicker">PRÁTICA E REVISÃO</p><h2>Desafio final: a próxima decisão da Aurora</h2><p>A Aurora tem matriz, filial, funcionários remotos, pastas departamentais e um ERP que depende de Windows. Ainda não há orçamento nem requisitos completos disponíveis.</p><p>Escolha uma alternativa em cada situação e verifique sua resposta. Você pode tentar novamente.</p><noscript>Ative o JavaScript para conferir as respostas e os comentários.</noscript>
+<form class="revisao-questao" data-correta="0" data-explicacao="O AD DS ajuda a administrar identidades e recursos de forma centralizada; acessos ainda precisam ser configurados e verificados."><fieldset><legend>01. Qual necessidade da Aurora pode ser atendida pelo Windows Server e pelo AD DS?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-1" value="0"> <span>Centralizar a gestão de identidades e facilitar o acesso controlado a recursos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-1" value="1"> <span>Eliminar qualquer necessidade de administrar usuários.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-1" value="2"> <span>Garantir que todos os funcionários tenham acesso irrestrito.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-1" value="3"> <span>Substituir automaticamente o ERP por outro produto.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="O Windows 2000 já oferecia mecanismos de controle de acesso; a existência deles não significa que toda configuração fosse segura."><fieldset><legend>02. Por que seria incorreto afirmar que o Windows 2000 não tinha permissões?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-2" value="0"> <span>Porque o Windows 2000 não possuía contas de usuário.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-2" value="1"> <span>Porque já havia mecanismos de controle de acesso, como permissões NTFS.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-2" value="2"> <span>Porque toda instalação era automaticamente segura.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-2" value="3"> <span>Porque o Active Directory eliminava todas as falhas de segurança.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="A discussão destaca uma postura mais voltada à segurança e à redução da superfície de exposição, sem implicar ausência de riscos."><fieldset><legend>03. Qual mudança de postura foi destacada na evolução para o Windows Server 2003?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-3" value="0"> <span>Uma atenção maior à segurança e à redução da exposição de serviços desnecessários.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-3" value="1"> <span>O abandono de toda gestão de identidades.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-3" value="2"> <span>A garantia de que nenhum serviço precisa de atualização.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-3" value="3"> <span>A remoção de permissões e grupos.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="Novas licenças e base instalada são conjuntos distintos; é necessário observar período, universo e metodologia dos dados."><fieldset><legend>04. O que um dado de 55,1% de novas licenças informa?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-4" value="0"> <span>Que 55,1% de todas as instalações existentes usavam necessariamente o produto.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-4" value="1"> <span>Que a mesma proporção valia para todos os países e períodos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-4" value="2"> <span>Que essa era a proporção no recorte de novas licenças analisado, não necessariamente na base instalada.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-4" value="3"> <span>Que todas as licenças antigas foram desativadas.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="A autenticação identifica a conta; a autorização considera as regras aplicáveis à ação e ao recurso."><fieldset><legend>05. Ana entra no domínio e tenta abrir uma pasta financeira. Que etapas estão envolvidas?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-5" value="0"> <span>A autenticação confirma a identidade; a autorização avalia o acesso ao recurso.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-5" value="1"> <span>Entrar no domínio libera automaticamente todas as pastas.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-5" value="2"> <span>A pasta autentica a estação substituindo todos os grupos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-5" value="3"> <span>A autorização ocorre apenas quando a senha está errada.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="Versão do Windows Server e níveis funcionais são conceitos relacionados, mas distintos; mudanças exigem verificar requisitos e compatibilidade."><fieldset><legend>06. Qual é a diferença entre a versão do sistema operacional do servidor e o nível funcional do domínio?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-6" value="0"> <span>São sempre o mesmo número e mudam juntos automaticamente.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-6" value="1"> <span>A versão identifica o SO; o nível funcional define capacidades e requisitos aplicáveis ao domínio ou à floresta.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-6" value="2"> <span>O nível funcional é apenas o espaço livre do disco.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-6" value="3"> <span>A versão do SO define, sozinha, todas as permissões de usuários.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="O PowerShell oferece comandos e recursos de script para administração e automação no Windows, conforme as ferramentas disponíveis."><fieldset><legend>07. A Aurora quer automatizar tarefas administrativas em servidores Windows. Qual escolha atende diretamente a essa necessidade?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-7" value="0"> <span>PowerShell, com comandos e scripts adequados às tarefas.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-7" value="1"> <span>Desativar a administração remota sem estudar o cenário.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-7" value="2"> <span>Usar apenas um navegador para formatar todos os discos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-7" value="3"> <span>Eliminar grupos e aplicar permissões manualmente a cada usuário.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="WSL fornece um ambiente Linux; PowerShell é um shell e uma linguagem de automação. Eles podem ser usados de forma complementar."><fieldset><legend>08. Por que o WSL não substitui o PowerShell?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-8" value="0"> <span>Porque o WSL é uma forma de executar um ambiente Linux no Windows, enquanto o PowerShell é um shell e uma linguagem de automação.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-8" value="1"> <span>Porque WSL e PowerShell são nomes diferentes do mesmo sistema de arquivos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-8" value="2"> <span>Porque o PowerShell só pode ser usado dentro do WSL.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-8" value="3"> <span>Porque nenhum deles permite executar comandos.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="A escolha depende de requisitos e restrições concretos, incluindo responsabilidades operacionais, integração, custos e disponibilidade."><fieldset><legend>09. Quando faz sentido comparar uma solução local com um serviço gerenciado?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-9" value="0"> <span>Somente depois de desligar os serviços existentes.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-9" value="1"> <span>Quando se analisam necessidades de controle, integração, operação, custos e dependências.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-9" value="2"> <span>Quando se assume que nuvem é sempre mais barata em qualquer cenário.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-9" value="3"> <span>Quando se ignora a compatibilidade do ERP.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="Uma recomendação responsável exige conhecer requisitos, custos, compatibilidade, segurança, riscos e continuidade antes de decidir."><fieldset><legend>10. Que informações faltam antes de recomendar uma migração da Aurora?</legend>
+<label class="revisao-alternativa"><input type="radio" name="desafio-10" value="0"> <span>Somente a preferência pela cor da interface.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-10" value="1"> <span>Apenas o nome do servidor principal.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-10" value="2"> <span>Custos, compatibilidade do ERP, requisitos de segurança, riscos e continuidade.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="desafio-10" value="3"> <span>Nenhuma: o tamanho da empresa determina sozinho a solução correta.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+</section>
 
       <!-- =====================================================
            REFERÊNCIAS
            ===================================================== -->
 
-      <section id="pratica-doze" class="lesson-section"><p class="kicker">PRÁTICA E REVISÃO</p><h2>Exercícios para desenvolver</h2><p>Para cada item, registre procedimento, evidência e conclusão. Quando não houver o ambiente, descreva o teste e identifique o resultado como hipótese.</p><ol class="tasks"><li>Explique a diferença entre autenticação e autorização usando a pasta Financeiro.</li><li>Identifique usuário e grupos da sessão; registre apenas informações necessárias.</li><li>Crie uma tabela de permissões esperadas para Financeiro e Atendimento.</li><li>Observe a ACL de uma pasta de laboratório usando a interface e icacls.</li><li>Diferencie uma permissão herdada de uma explícita no seu cenário.</li><li>Compare acesso local com acesso por caminho UNC.</li><li>Descreva um teste positivo e um negativo para gravação em SMB.</li><li>Desenhe usuário, grupo, OU e domínio, indicando a função de cada um.</li><li>Explique por que DNS é importante em um domínio AD DS.</li><li>Compare AD DS e Entra ID e explique o que uma sincronização de identidades não garante sobre ACLs NTFS.</li><li>Diagnostique: uma conta autentica, mas não grava. Liste três verificações antes de mudar permissões.</li><li>Monte uma matriz com identidade, grupo, ação, regra esperada, resultado observado e evidência.</li></ol><details><summary>Como organizar sua entrega</summary><p>Informe o ambiente e a topologia, separe observação de hipótese e registre o resultado dos testes positivos e negativos. Revise o conteúdo antes de entregar: não inclua senhas, chaves ou dados pessoais desnecessários.</p></details></section>
-<section id="macos" class="lesson-section"><p class="kicker">PRÁTICA SIMULADA · macOS</p><h2>Terminal macOS: experimente no papel</h2><p>Digite o comando que você usaria em cada situação. Esta atividade compara texto com respostas previstas: <strong>não executa comandos, não acessa um Mac e não simula a saída real do terminal</strong>. Cada questão é independente. Muitos comandos também existem no Linux, mas opções e ferramentas podem variar.</p><noscript>Ative o JavaScript para responder às questões.</noscript><div id="mac-simulador"></div><script src="simulador-macos.js" defer></script></section>
+      <section id="pratica-doze" class="lesson-section"><p class="kicker">REVISÃO DE CONTEÚDOS</p><h2>Questões de revisão</h2><p>Escolha uma alternativa e verifique sua resposta. Você pode tentar novamente.</p><noscript>Ative o JavaScript para conferir as respostas e os comentários.</noscript>
+<form class="revisao-questao" data-correta="0" data-explicacao="Autenticar é confirmar quem está acessando; autorizar é decidir quais ações essa identidade pode realizar."><fieldset><legend>01. Qual é a diferença entre autenticação e autorização?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-1" value="0"> <span>Autenticação confirma a identidade; autorização determina o que ela pode acessar.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-1" value="1"> <span>Autenticação define permissões NTFS; autorização cria usuários.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-1" value="2"> <span>As duas expressões significam apenas fazer uma cópia dos arquivos.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-1" value="3"> <span>Autorização verifica a senha antes de existir uma conta.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="O controlador hospeda serviços de domínio e uma cópia do diretório, participando da autenticação e de outras funções do AD DS."><fieldset><legend>02. Qual é a função de um controlador de domínio no AD DS?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-2" value="0"> <span>Hospedar exclusivamente aplicativos web na nuvem.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-2" value="1"> <span>Armazenar uma cópia do diretório e fornecer serviços de autenticação e domínio.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-2" value="2"> <span>Substituir o sistema de arquivos NTFS em todas as estações.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-2" value="3"> <span>Sincronizar relógios sem participar da autenticação.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="Uma floresta é uma estrutura lógica que pode reunir um ou mais domínios do Active Directory."><fieldset><legend>03. Como floresta e domínio se relacionam no Active Directory?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-3" value="0"> <span>Uma floresta é uma pasta compartilhada dentro de cada OU.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-3" value="1"> <span>Um domínio só pode conter computadores, nunca contas.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-3" value="2"> <span>Uma floresta pode conter um ou mais domínios relacionados.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-3" value="3"> <span>Cada usuário precisa criar sua própria floresta.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="OUs organizam objetos e ajudam na administração; grupos de segurança reúnem identidades para atribuição de permissões."><fieldset><legend>04. Para que servem as unidades organizacionais (OUs)?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-4" value="0"> <span>Substituir todas as permissões de arquivos NTFS.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-4" value="1"> <span>Organizar objetos do domínio e ajudar na administração e aplicação de políticas.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-4" value="2"> <span>Servir como sinônimo de grupo de segurança.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-4" value="3"> <span>Armazenar backups de arquivos na nuvem.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="Atribuir a permissão ao grupo simplifica a administração, pois o acesso pode ser gerenciado pela associação de contas ao grupo."><fieldset><legend>05. Por que usar um grupo de segurança para acessar a pasta Financeiro?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-5" value="0"> <span>Para conceder permissões ao grupo e administrar seus membros.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-5" value="1"> <span>Para transformar a pasta em um controlador de domínio.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-5" value="2"> <span>Para que todos os usuários do domínio tenham acesso automático.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-5" value="3"> <span>Para eliminar a necessidade de verificar permissões efetivas.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="Uma entrada herdada vem de uma pasta ou objeto pai, conforme as configurações de herança; entradas explícitas são definidas no próprio objeto."><fieldset><legend>06. Qual afirmação descreve corretamente uma permissão NTFS herdada?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-6" value="0"> <span>É sempre negada pelo Windows.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-6" value="1"> <span>Vem de um objeto pai quando a herança está habilitada.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-6" value="2"> <span>Só existe durante o acesso pela internet.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-6" value="3"> <span>É uma senha definida no Microsoft Entra ID.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="No acesso pela rede, avalie tanto as permissões do compartilhamento quanto as NTFS, além dos grupos e regras aplicáveis à sessão."><fieldset><legend>07. Ao acessar uma pasta compartilhada por um caminho UNC, quais permissões devem ser verificadas?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-7" value="0"> <span>Somente a cor do ícone da pasta.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-7" value="1"> <span>Apenas o nome do computador do usuário.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-7" value="2"> <span>As regras de compartilhamento e as permissões NTFS aplicáveis.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-7" value="3"> <span>Somente a associação do usuário a uma OU.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="O DNS ajuda os clientes a descobrir controladores de domínio e serviços necessários ao funcionamento do Active Directory."><fieldset><legend>08. Por que o DNS é importante em um domínio AD DS?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-8" value="0"> <span>Porque ajuda clientes a localizar controladores de domínio e outros serviços.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-8" value="1"> <span>Porque substitui o diretório e armazena todas as senhas em texto.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-8" value="2"> <span>Porque define sozinho todas as permissões NTFS.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-8" value="3"> <span>Porque dispensa a conectividade entre os computadores.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="1" data-explicacao="O Entra Connect pode sincronizar identidades selecionadas; isso não implica copiar automaticamente permissões NTFS locais."><fieldset><legend>09. O que a sincronização pelo Microsoft Entra Connect pode fazer?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-9" value="0"> <span>Copiar automaticamente todas as ACLs NTFS para qualquer serviço de nuvem.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-9" value="1"> <span>Sincronizar objetos de identidade selecionados entre o AD DS e o Entra ID.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-9" value="2"> <span>Transformar qualquer computador em controlador de domínio.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-9" value="3"> <span>Desativar a necessidade de autorização nos aplicativos.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="O AD FS pode atuar como provedor de identidade federado; outros métodos de autenticação híbrida não exigem AD FS."><fieldset><legend>10. Qual alternativa descreve o AD FS em uma arquitetura de identidade híbrida?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-10" value="0"> <span>É obrigatório para todas as configurações híbridas.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-10" value="1"> <span>É um sistema de arquivos que substitui o NTFS.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-10" value="2"> <span>É uma opção de federação que pode autenticar usuários e emitir tokens.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-10" value="3"> <span>É a mesma coisa que uma OU.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="2" data-explicacao="A autenticação bem-sucedida não garante autorização. Verifique grupos e regras aplicáveis, incluindo permissões do compartilhamento e NTFS."><fieldset><legend>11. Uma conta entra no domínio, mas não grava em uma pasta compartilhada. O que verificar?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-11" value="0"> <span>Trocar imediatamente a senha de todos os usuários.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-11" value="1"> <span>Assumir que a autenticação garante gravação.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-11" value="2"> <span>Verificar grupos, permissões do compartilhamento e ACL NTFS, considerando a sessão.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-11" value="3"> <span>Remover todas as permissões da pasta sem investigar.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+<form class="revisao-questao" data-correta="0" data-explicacao="No Windows, whoami mostra a identidade, whoami /groups consulta grupos da sessão e icacls permite consultar ou administrar ACLs."><fieldset><legend>12. Quais comandos ajudam a investigar identidade e permissões no Windows?</legend>
+<label class="revisao-alternativa"><input type="radio" name="questao-12" value="0"> <span>whoami, whoami /groups e icacls.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-12" value="1"> <span>mkfs, mount e chmod como únicos comandos nativos do Windows.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-12" value="2"> <span>ping, isoladamente, mostra todas as entradas da ACL NTFS.</span></label>
+<label class="revisao-alternativa"><input type="radio" name="questao-12" value="3"> <span>whoami /groups altera automaticamente as permissões.</span></label>
+</fieldset><button type="submit">Verificar resposta</button><p class="revisao-feedback" role="status" aria-live="polite"></p></form>
+</section><script src="revisao-questoes.js" defer></script>
+
 
       <footer>
         IFSP · Sistemas Operacionais · Aula 11 ·
