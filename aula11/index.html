@@ -38,7 +38,14 @@
     .visual-between figcaption{margin-top:12px;color:var(--muted);font-size:.9rem}
     a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
     @media print{body{background:#fff!important;color:#111!important}.top,aside,#tema{display:none}.layout{display:block}main{padding:0}.visual-between{break-inside:avoid}a{color:#111!important}table{min-width:0}}
-  </style>
+  
+    /* Mesmas cores da Aula 10, nos dois temas. */
+    :root{--bg:#202529;--panel:#293137;--panel2:#141e26;--ink:#f4f4f1;--muted:#bdc8cd;--line:#485960;--accent:#7cd3d0;--gold:#efc673}
+    body.claro{--bg:#f1f5f4;--panel:#fff;--panel2:#e7efed;--ink:#1c3037;--muted:#526a70;--line:#c5d4d3;--accent:#087875;--gold:#845d11}
+    header,body.claro header{background:var(--panel2)}
+    pre{background:#101820;color:#f4f4f1}
+
+</style>
 </head>
 
 <body>
@@ -70,7 +77,7 @@
         <a href="#bloco-4">04 · Aplicação e revisão</a>
         <a href="#pratica-doze">Exercícios de revisão</a>
         <a href="#macos">Prática simulada de macOS</a>
-        <a href="#fontes">Referências</a>
+        
       </nav>
     </aside>
 
@@ -136,6 +143,7 @@
           Depois chega a 300 pessoas, abre uma filial e passa a ter
           trabalho remoto.
         </p>
+
 
         <p>
           Como cadastrar usuários, organizar acesso, aplicar regras
@@ -527,6 +535,7 @@
           Estes conceitos são centrais para a atividade.
           Use arquivos e ambientes de laboratório autorizados.
         </p>
+
 
         <details open>
           <summary>
@@ -1641,199 +1650,6 @@ Get-Process |
 
       <section id="pratica-doze" class="lesson-section"><p class="kicker">PRÁTICA E REVISÃO</p><h2>Exercícios para desenvolver</h2><p>Para cada item, registre procedimento, evidência e conclusão. Quando não houver o ambiente, descreva o teste e identifique o resultado como hipótese.</p><ol class="tasks"><li>Explique a diferença entre autenticação e autorização usando a pasta Financeiro.</li><li>Identifique usuário e grupos da sessão; registre apenas informações necessárias.</li><li>Crie uma tabela de permissões esperadas para Financeiro e Atendimento.</li><li>Observe a ACL de uma pasta de laboratório usando a interface e icacls.</li><li>Diferencie uma permissão herdada de uma explícita no seu cenário.</li><li>Compare acesso local com acesso por caminho UNC.</li><li>Descreva um teste positivo e um negativo para gravação em SMB.</li><li>Desenhe usuário, grupo, OU e domínio, indicando a função de cada um.</li><li>Explique por que DNS é importante em um domínio AD DS.</li><li>Compare AD DS e Entra ID e explique o que uma sincronização de identidades não garante sobre ACLs NTFS.</li><li>Diagnostique: uma conta autentica, mas não grava. Liste três verificações antes de mudar permissões.</li><li>Monte uma matriz com identidade, grupo, ação, regra esperada, resultado observado e evidência.</li></ol><details><summary>Como organizar sua entrega</summary><p>Informe o ambiente e a topologia, separe observação de hipótese e registre o resultado dos testes positivos e negativos. Revise o conteúdo antes de entregar: não inclua senhas, chaves ou dados pessoais desnecessários.</p></details></section>
 <section id="macos" class="lesson-section"><p class="kicker">PRÁTICA SIMULADA · macOS</p><h2>Terminal macOS: experimente no papel</h2><p>Digite o comando que você usaria em cada situação. Esta atividade compara texto com respostas previstas: <strong>não executa comandos, não acessa um Mac e não simula a saída real do terminal</strong>. Cada questão é independente. Muitos comandos também existem no Linux, mas opções e ferramentas podem variar.</p><noscript>Ative o JavaScript para responder às questões.</noscript><div id="mac-simulador"></div><script src="simulador-macos.js" defer></script></section>
-<section id="fontes" class="lesson-section">
-        <h2>Referências e limites da aula</h2>
-
-        <p>
-          Revisão editorial: 31/10/2026.
-          Recursos e requisitos podem mudar com atualizações.
-          Consulte a documentação antes de implantar.
-        </p>
-
-        <p>
-          Os espaços de animação são roteiros,
-          não arquivos já renderizados.
-        </p>
-
-        <ul class="sources">
-          <li>
-            <a
-              href="https://www.theregister.com/on-prem/2003/10/08/windows-linux-gain-in-server-sales-but-what-about-free/1345092"
-            >
-              Mercado 2001–2002 —
-              The Register, citando IDC
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://www.microsoft.com/en-us/windows-server/blog/2006/03/01/windows-server-in-1st-place-in-world-wide-server-market/"
-            >
-              Receita de servidores em 2005 —
-              Microsoft, citando IDC
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://download.microsoft.com/download/8/1/6/816C597A-5592-4867-A0A6-A0181703CD59/Microsoft_Press_eBook_TheSecurityDevelopmentLifecycle_PDF.pdf"
-            >
-              Security Development Lifecycle —
-              Microsoft — PDF
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/ja-jp/security-updates/updatemanagement/19869658"
-            >
-              Gestão de patches e incidentes históricos —
-              Microsoft — japonês
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/security-updates/securitybulletins/2003/ms03-026"
-            >
-              Boletim MS03-026 — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/archive/msdn-magazine/2008/november/access-control-understanding-windows-file-and-registry-permissions"
-            >
-              Permissões de arquivos e registro — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/troubleshoot/windows-client/windows-security/permissions-on-copying-moving-files"
-            >
-              Permissões NTFS em Windows 2000 e 2003 — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels"
-            >
-              Níveis funcionais do AD DS — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/ad-ds-simplified-administration"
-            >
-              Administração simplificada do AD DS — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups"
-            >
-              Grupos de segurança do AD — Microsoft
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2016"
-            >
-              Novidades do Windows Server 2016
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2019"
-            >
-              Novidades do Windows Server 2019
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2022"
-            >
-              Novidades do Windows Server 2022
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025"
-            >
-              Novidades do Windows Server 2025
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://devblogs.microsoft.com/powershell/powershell-on-linux-and-open-source-2/"
-            >
-              PowerShell aberto e multiplataforma — 2016
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://news.microsoft.com/source/2006/11/02/microsoft-and-novell-announce-broad-collaboration-on-windows-and-linux-interoperability-and-support/"
-            >
-              Acordo Microsoft–Novell — 2006
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows/wsl/about"
-            >
-              O que é Windows Subsystem for Linux
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/securing-domain-controllers-against-attack"
-            >
-              Proteção de controladores de domínio
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows-server/get-started/editions-comparison"
-            >
-              Comparação de edições do Windows Server
-            </a>
-          </li>
-
-          <li>
-            <a
-              href="https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info"
-            >
-              Informações de lançamento do Windows Server
-            </a>
-          </li>
-        </ul>
-      </section>
-
-      <nav
-        class="footnav"
-        aria-label="Navegação entre aulas"
-      >
-        <a href="../aula10/index.html">
-          ← Aula anterior
-        </a>
-
-        <a href="../aula12/index.html">
-          Próxima aula →
-        </a>
-      </nav>
 
       <footer>
         IFSP · Sistemas Operacionais · Aula 11 ·
