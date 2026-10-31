@@ -1,0 +1,27 @@
+# Fontes de consulta — Aula 11
+
+Fontes bibliográficas preservadas para manutenção editorial; as referências não aparecem entre os parágrafos da aula.
+
+- [Microsoft · origem e evolução do Active Directory](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025)
+- [Microsoft · permissões NTFS no Windows 2000 e 2003](https://learn.microsoft.com/en-us/troubleshoot/windows-client/windows-security/permissions-on-copying-moving-files)
+- [The Register · reportagem contemporânea, 08/10/2003](https://www.theregister.com/on-prem/2003/10/08/windows-linux-gain-in-server-sales-but-what-about-free/1345092)
+- [Microsoft · marco de receita de 2005](https://www.microsoft.com/en-us/windows-server/blog/2006/03/01/windows-server-in-1st-place-in-world-wide-server-market/)
+- [Microsoft · cronologia e gestão de patches — documento em japonês](https://learn.microsoft.com/ja-jp/security-updates/updatemanagement/19869658)
+- [Microsoft · boletim MS03-026](https://learn.microsoft.com/en-us/security-updates/securitybulletins/2003/ms03-026)
+- [Microsoft · Security Development Lifecycle — PDF](https://download.microsoft.com/download/8/1/6/816C597A-5592-4867-A0A6-A0181703CD59/Microsoft_Press_eBook_TheSecurityDevelopmentLifecycle_PDF.pdf)
+- [Microsoft · avaliação de permissões](https://learn.microsoft.com/en-us/archive/msdn-magazine/2008/november/access-control-understanding-windows-file-and-registry-permissions)
+- [Microsoft · grupos de segurança](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups)
+- [Microsoft · níveis funcionais](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels)
+- [Microsoft · administração simplificada](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/ad-ds-simplified-administration)
+- [Microsoft · Active Directory em 2025](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025)
+- [Microsoft · informações de lançamento](https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info)
+- [Novidades de 2016](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2016)
+- [Novidades de 2019](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2019)
+- [Novidades de 2022](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2022)
+- [Novidades de 2025](https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025)
+- [PowerShell Team · anúncio de 2016](https://devblogs.microsoft.com/powershell/powershell-on-linux-and-open-source-2/)
+- [Microsoft · acordo de 2006](https://news.microsoft.com/source/2006/11/02/microsoft-and-novell-announce-broad-collaboration-on-windows-and-linux-interoperability-and-support/)
+- [Microsoft · o que é WSL](https://learn.microsoft.com/en-us/windows/wsl/about)
+- [Microsoft · proteção de controladores de domínio](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/securing-domain-controllers-against-attack)
+- [Microsoft · comparação de edições](https://learn.microsoft.com/en-us/windows-server/get-started/editions-comparison)
+- [Microsoft · comparação de soluções de identidade](https://learn.microsoft.com/en-us/entra/identity/domain-services/compare-identity-solutions)
