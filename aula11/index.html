@@ -1,7 +1,2268 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Aula 11 · Permissões, Active Directory e identidade híbrida</title><link rel="stylesheet" href="../assets/css/modulo-pratico.css"><script src="../assets/js/modulo-pratico.js" defer></script></head><body><header><div class="top"><span class="tag">SISTEMAS OPERACIONAIS / AULA 11</span><button id="tema" type="button" aria-pressed="false">Tema claro</button></div></header><div class="layout"><aside><p class="kicker">NESTA AULA</p><nav aria-label="Conteúdo da aula"><a href="#cenario">O problema: quem pode acessar?</a><a href="#conceitos">Identidade, autenticação e autorização</a><a href="#ntfs">NTFS: permissões e herança</a><a href="#smb">Compartilhamento SMB e acesso efetivo</a><a href="#ad">AD DS: domínio, unidades, grupos e DNS</a><a href="#entra">Entra ID e identidade híbrida</a><a href="#diagnostico">Diagnóstico: evidências e limites</a><a href="#exercicios">Exercícios</a><a href="#fontes">Referências</a><a href="#macos">Prática macOS</a></nav></aside><main><section class="hero"><p class="kicker">AULA 11 · WINDOWS SERVER · IDENTIDADE E ARQUIVOS</p><h1>Permissões, Active Directory e identidade híbrida</h1><p class="lead">Conecte usuários e grupos a permissões efetivas em arquivos, compartilhamentos e serviços de identidade.</p><div class="meta"><strong>Ambiente e preparo</strong><p>Ambiente comum: Windows e WSL. Permissões locais podem ser observadas em uma pasta do usuário; AD DS, compartilhamento de servidor e Entra ID são estudados por cenários simulados. Uma VM Windows Server é opcional.</p></div></section><section id="cenario" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>O problema: quem pode acessar?</h2><p>Uma empresa tem as equipes Financeiro e Atendimento. Os membros do Financeiro devem ler e alterar documentos de sua área; o Atendimento não deve conseguir abri-los. O servidor oferece uma pasta compartilhada. Ter acesso à rede não basta: precisamos conhecer a identidade usada, os grupos e as permissões aplicáveis.</p><p>Ao longo da aula, acompanhe o caminho <strong>pessoa → conta → grupos → compartilhamento SMB → permissões NTFS → operação</strong>. Uma verificação bem-sucedida em uma camada não garante que as demais autorizem a operação.</p><div class="callout"><p>Use apenas uma pasta de teste no seu perfil. A criação de domínio e contas de servidor será analisada por cenário; uma VM isolada é opcional. Não altere pastas do sistema ou de uma organização.</p></div></section><section id="conceitos" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>Identidade, autenticação e autorização</h2><p><strong>Identidade</strong> representa um usuário, computador ou serviço. A <strong>autenticação</strong> procura comprovar essa identidade. A <strong>autorização</strong> determina o que ela pode fazer. <strong>Auditoria</strong> registra eventos quando a política apropriada está configurada; não confunda a ausência de evento com prova de que nada ocorreu.</p><p>Uma conta pode pertencer a vários grupos. Uma permissão atribuída a um grupo pode alcançar seus membros; alterações de associação podem exigir nova sessão ou atualização do token antes de aparecer em um teste.</p><pre><code>whoami
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Windows Server - A escolha das grandes corporações para ambientes LAN</title>
+
+  <meta
+    name="description"
+    content="Aula 11: história do Windows Server, segurança, mercado, Active Directory, PowerShell e decisões de infraestrutura de 2000 a 2025."
+  >
+
+  <!-- Folha compartilhada do projeto original. -->
+  <link
+    rel="stylesheet"
+    href="../assets/css/modulo-pratico.css"
+  >
+
+  <style>
+    /*
+     * Estilos locais da Aula 11.
+     *
+     * Montserrat será utilizada se estiver disponível no ambiente
+     * ou carregada pela folha compartilhada.
+     *
+     * Este arquivo não incorpora fontes nem afirma reproduzir,
+     * sozinho, o catálogo visual das animações.
+     */
+
+    .aula11-review {
+      --a11-bg: #101e35;
+      --a11-card: #172d49;
+      --a11-text: #f0f5fc;
+      --a11-muted: #ccd9e9;
+      --a11-accent: #ff9b45;
+      --a11-line: #526f8b;
+
+      margin: 0;
+      background: var(--a11-bg);
+      color: var(--a11-text);
+
+      font-family:
+        Montserrat,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+      line-height: 1.75;
+      color-scheme: dark;
+    }
+
+    .aula11-review.a11-light {
+      --a11-bg: #f3f6fb;
+      --a11-card: #ffffff;
+      --a11-text: #182238;
+      --a11-muted: #344a62;
+      --a11-accent: #9f4300;
+      --a11-line: #c0ccda;
+
+      color-scheme: light;
+    }
+
+    .aula11-review * {
+      box-sizing: border-box;
+    }
+
+    .aula11-review header {
+      padding: 16px 28px;
+      border-bottom: 1px solid var(--a11-line);
+    }
+
+    .aula11-review .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+
+      max-width: 1394px;
+      margin: 0 auto;
+    }
+
+    .aula11-review .tag,
+    .aula11-review .kicker {
+      color: var(--a11-accent);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
+    .aula11-review .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      gap: 32px;
+
+      max-width: 1450px;
+      margin: 0 auto;
+      padding: 28px;
+    }
+
+    .aula11-review aside {
+      position: sticky;
+      top: 16px;
+      align-self: start;
+
+      max-height: 90vh;
+      overflow-y: auto;
+      padding-right: 10px;
+    }
+
+    .aula11-review aside nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .aula11-review aside a {
+      padding: 6px 0;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      text-decoration: none;
+    }
+
+    .aula11-review main {
+      min-width: 0;
+      max-width: 1050px;
+    }
+
+    .aula11-review .hero {
+      padding: 20px 0 32px;
+    }
+
+    .aula11-review h1 {
+      font-size: clamp(2rem, 4vw, 3.1rem);
+      font-weight: 700;
+      line-height: 1.18;
+      letter-spacing: -0.025em;
+    }
+
+    .aula11-review h2 {
+      font-size: 1.65rem;
+      line-height: 1.3;
+    }
+
+    .aula11-review h3 {
+      line-height: 1.4;
+    }
+
+    .aula11-review .lead {
+      color: var(--a11-muted);
+      font-size: 1.2rem;
+    }
+
+    .aula11-review .lesson-section {
+      padding: 28px 0;
+      border-top: 1px solid var(--a11-line);
+      scroll-margin-top: 24px;
+    }
+
+    .aula11-review a {
+      color: var(--a11-accent);
+      overflow-wrap: anywhere;
+    }
+
+    .aula11-review a:hover {
+      text-decoration: underline;
+    }
+
+    .aula11-review a:focus-visible,
+    .aula11-review button:focus-visible,
+    .aula11-review summary:focus-visible {
+      outline: 3px solid #69add1;
+      outline-offset: 4px;
+    }
+
+    .aula11-review .meta,
+    .aula11-review .callout,
+    .aula11-review details,
+    .aula11-review .animation-slot {
+      margin: 20px 0;
+      padding: 18px 22px;
+
+      background: var(--a11-card);
+      border: 1px solid var(--a11-line);
+      border-radius: 18px;
+    }
+
+    .aula11-review .meta > :first-child,
+    .aula11-review .callout > :first-child {
+      margin-top: 0;
+    }
+
+    .aula11-review .meta > :last-child,
+    .aula11-review .callout > :last-child {
+      margin-bottom: 0;
+    }
+
+    .aula11-review .callout {
+      border-left: 4px solid var(--a11-accent);
+    }
+
+    .aula11-review .table-wrap {
+      margin: 22px 0;
+      overflow-x: auto;
+    }
+
+    .aula11-review table {
+      width: 100%;
+      min-width: 590px;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+
+    .aula11-review th,
+    .aula11-review td {
+      padding: 14px;
+      border: 1px solid var(--a11-line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .aula11-review thead {
+      background: var(--a11-card);
+    }
+
+    .aula11-review caption {
+      padding: 10px 0;
+      color: var(--a11-muted);
+      font-size: 0.9rem;
+      text-align: left;
+    }
+
+    .aula11-review pre {
+      overflow-x: auto;
+      padding: 16px;
+
+      background: var(--a11-bg);
+      color: var(--a11-text);
+
+      border: 1px solid var(--a11-line);
+      border-radius: 12px;
+    }
+
+    .aula11-review code {
+      font-family:
+        ui-monospace,
+        Consolas,
+        "Liberation Mono",
+        monospace;
+    }
+
+    .aula11-review .flow {
+      padding: 18px;
+
+      border: 1px dashed var(--a11-accent);
+      border-radius: 14px;
+
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .aula11-review summary {
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .aula11-review details[open] > summary {
+      margin-bottom: 20px;
+    }
+
+    .aula11-review .animation-slot {
+      border-style: dashed;
+    }
+
+    .aula11-review .status {
+      color: var(--a11-accent);
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .aula11-review figcaption,
+    .aula11-review .source-inline {
+      font-size: 0.86rem;
+    }
+
+    .aula11-review figcaption {
+      margin-top: 16px;
+      color: var(--a11-muted);
+    }
+
+    .aula11-review button {
+      padding: 8px 16px;
+
+      background: var(--a11-card);
+      color: var(--a11-text);
+
+      border: 1px solid var(--a11-line);
+      border-radius: 20px;
+
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .aula11-review .footnav {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+
+      margin: 30px 0;
+    }
+
+    .aula11-review footer {
+      padding: 20px 0;
+      color: var(--a11-muted);
+      font-size: 0.85rem;
+    }
+
+    @media (max-width: 950px) {
+      .aula11-review .layout {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 18px;
+      }
+
+      .aula11-review aside {
+        position: static;
+        max-height: none;
+      }
+
+      .aula11-review aside nav {
+        grid-template-columns:
+          repeat(auto-fit, minmax(190px, 1fr));
+
+        gap: 10px;
+      }
+
+      .aula11-review h1 {
+        font-size: 2rem;
+      }
+    }
+
+    @media (max-width: 520px) {
+      .aula11-review header {
+        padding: 14px 18px;
+      }
+
+      .aula11-review .top {
+        align-items: flex-start;
+      }
+
+      .aula11-review .tag {
+        max-width: 200px;
+      }
+
+      .aula11-review .meta,
+      .aula11-review .callout,
+      .aula11-review details,
+      .aula11-review .animation-slot {
+        padding: 16px;
+      }
+
+      .aula11-review .footnav {
+        flex-direction: column;
+      }
+    }
+
+    @media print {
+      .aula11-review {
+        background: #ffffff !important;
+        color: #111111 !important;
+      }
+
+      .aula11-review .layout {
+        display: block;
+      }
+
+      .aula11-review aside,
+      .aula11-review #tema {
+        display: none;
+      }
+
+      .aula11-review .lesson-section {
+        break-inside: auto;
+      }
+
+      .aula11-review a {
+        color: #111111;
+      }
+
+      .aula11-review table {
+        min-width: 0;
+      }
+    }
+  .aula11-review .block-marker{margin:60px 0 20px;padding:26px 30px;border:1px solid var(--a11-line);border-left:6px solid var(--a11-accent);border-radius:12px;background:var(--a11-card)}.aula11-review .block-marker h2{margin:8px 0;font-size:2rem}.aula11-review .block-marker p:last-child{margin:0;color:var(--a11-muted)}.aula11-review .animation-slot img{display:block;width:100%;height:auto;border-radius:8px}.aula11-review .animation-slot figcaption{margin-top:12px;color:var(--a11-muted);font-size:.9rem}
+</style>
+</head>
+
+<body class="aula11-review">
+  <header>
+    <div class="top">
+      <span class="tag">
+        SISTEMAS OPERACIONAIS / AULA 11
+      </span>
+
+      <button
+        id="tema"
+        type="button"
+        aria-pressed="false"
+        aria-label="Alternar entre tema claro e escuro"
+      >
+        Tema claro
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside>
+      <p class="kicker">NESTA AULA</p>
+
+      <nav aria-label="Conteúdo da aula">
+<a href="#bloco-1">01 · Contexto e evolução</a><a href="#bloco-2">02 · Identidade e permissões</a><a href="#bloco-3">03 · Automação e nuvem</a><a href="#bloco-4">04 · Aplicação e revisão</a>
+        <a href="#cenario">Uma empresa cresce</a>
+        <a href="#windows2000">Windows 2000</a>
+        <a href="#mercado">Mercado e indicadores</a>
+        <a href="#seguranca">Problemas de segurança</a>
+        <a href="#server2003">A mudança em 2003</a>
+        <a href="#conceitos">Identidade e acesso</a>
+        <a href="#ntfs">Permissões NTFS</a>
+        <a href="#smb">Compartilhamento SMB</a>
+        <a href="#ad">Active Directory</a>
+        <a href="#evolucao-ad">Evolução do AD</a>
+        <a href="#versoes-recentes">Versões após 2015</a>
+        <a href="#powershell">PowerShell e WSL</a>
+        <a href="#remoto-cloud">Remoto e cloud</a>
+        <a href="#diagnostico">Diagnóstico opcional</a>
+        <a href="#exercicios">Desafio final</a>
+        <a href="#pratica-doze">12 exercícios de revisão</a><a href="#macos">Prática simulada de macOS</a><a href="#fontes">Referências</a>
+      </nav>
+    </aside>
+
+    <main id="conteudo">
+      <!-- =====================================================
+           ABERTURA
+           ===================================================== -->
+
+      <section class="hero">
+        <p class="kicker">
+          AULA 11 · HISTÓRIA, SEGURANÇA E ADMINISTRAÇÃO
+        </p>
+
+        <h1>
+          Windows Server - A escolha das grandes corporações
+          para ambientes LAN
+        </h1>
+
+        <p class="lead">
+          De Windows 2000 às versões atuais: entenda os problemas
+          resolvidos, os riscos e os motivos para escolher — ou não —
+          a plataforma.
+        </p>
+
+        <div class="meta">
+          <p>
+            Material de estudo e prática.
+            Conhecimentos básicos de Windows são suficientes.
+            As atividades usam Windows e WSL; uma VM é opcional.
+            A integração com nuvem será apenas conceitual.
+          </p>
+
+          <p>
+            O título é uma provocação para análise, não uma afirmação
+            de exclusividade ou domínio universal de mercado.
+          </p>
+        </div>
+
+        <div class="callout">
+          <p>
+            <strong>Roteiro:</strong>
+            contexto → mercado → segurança → Active Directory →
+            versões recentes → automação → decisão de arquitetura.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           CENÁRIO
+           ===================================================== -->
+
+      <section class="block-marker" id="bloco-1"><p class="kicker">BLOCO 01</p><h2>Contexto e evolução</h2><p>Por que centralizar a administração?</p></section>
+      <section id="cenario" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Uma empresa cresce. A administração precisa acompanhar.
+        </h2>
+
+        <p>
+          A empresa fictícia Aurora começa com 20 computadores,
+          contas locais, uma impressora e uma pasta compartilhada.
+          Depois chega a 300 pessoas, abre uma filial e passa a ter
+          trabalho remoto.
+        </p>
+
+        <p>
+          Como cadastrar usuários, organizar acesso, aplicar regras
+          e desligar contas sem repetir tudo em cada máquina?
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Pergunta-guia:</strong>
+            que problema cada geração do Windows Server ajudou
+            a resolver — e qual responsabilidade continuou com
+            o administrador?
+          </p>
+        </div>
+
+        <h3>Ao final da aula, você deverá conseguir</h3>
+
+        <ul>
+          <li>
+            Distinguir sistema de desktop, sistema de servidor
+            e papel de servidor.
+          </li>
+
+          <li>
+            Explicar o crescimento da plataforma sem confundir
+            adoção com segurança.
+          </li>
+
+          <li>
+            Relacionar AD, grupos, DNS, políticas e arquivos.
+          </li>
+
+          <li>
+            Avaliar vantagens, limites e alternativas em vez de
+            escolher apenas por familiaridade.
+          </li>
+        </ul>
+
+        <p>
+          Os números da empresa são um cenário didático,
+          não uma estatística de mercado.
+        </p>
+      </section>
+
+      <!-- =====================================================
+           WINDOWS 2000
+           ===================================================== -->
+
+      <section id="windows2000" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          2000: centralizar a identidade, ampliar a responsabilidade
+        </h2>
+
+        <p>
+          O Windows 2000 introduziu o Active Directory.
+          A mudança de perspectiva é sair de máquinas administradas
+          isoladamente para um diretório que organiza identidades
+          e computadores.
+        </p>
+
+        <p>
+          No caso Aurora, a conta de uma pessoa deixa de ser apenas
+          um cadastro independente em cada PC.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025"
+          >
+            Microsoft · origem e evolução do Active Directory ↗
+          </a>
+        </p>
+
+        <h3>Não era “tudo aberto”</h3>
+
+        <p>
+          O Windows 2000 já possuía permissões NTFS.
+          O problema a discutir é a combinação de serviços e
+          componentes habilitados, vulnerabilidades, exposição
+          à rede e dificuldades de atualização.
+        </p>
+
+        <p>
+          Portanto, evite confundir existência de controle de acesso
+          com configuração segura.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/troubleshoot/windows-client/windows-security/permissions-on-copying-moving-files"
+          >
+            Microsoft · permissões NTFS no Windows 2000 e 2003 ↗
+          </a>
+        </p>
+
+        <h3>Por que o mercado precisava disso?</h3>
+
+        <p>
+          A proposta de valor para a empresa do exemplo é centralizar
+          cadastros e administração. Para demonstrar adoção histórica,
+          precisamos explicitar o que cada pesquisa contou:
+          licença nova, instalação, receita ou servidor web são
+          indicadores diferentes.
+        </p>
+      </section>
+
+      <!-- =====================================================
+           MERCADO
+           ===================================================== -->
+
+      <section id="mercado" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Mercado: crescimento com o denominador à vista
+        </h2>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Recortes históricos — não representam a mesma
+              série temporal
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Período</th>
+                <th scope="col">Dado</th>
+                <th scope="col">O que significa</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <th scope="row">2001</th>
+
+                <td>Microsoft: 50,5%</td>
+
+                <td>
+                  Participação em novas remessas de licenças de
+                  sistemas operacionais de servidor, conforme
+                  reportagem de 2003 sobre dados IDC.
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">2002</th>
+
+                <td>
+                  Microsoft: 55,1%;
+                  Linux pago: 23,1%.
+                </td>
+
+                <td>
+                  Recorte comercial de novas licenças;
+                  não contabiliza toda implantação gratuita de Linux.
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">2005</th>
+
+                <td>
+                  Receita de servidores Windows supera a de Unix.
+                </td>
+
+                <td>
+                  Marco de receita divulgado pela Microsoft com
+                  base no IDC; não é percentual de instalações
+                  do Windows Server 2003.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://www.theregister.com/on-prem/2003/10/08/windows-linux-gain-in-server-sales-but-what-about-free/1345092"
+          >
+            The Register · reportagem contemporânea, 08/10/2003 ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://www.microsoft.com/en-us/windows-server/blog/2006/03/01/windows-server-in-1st-place-in-world-wide-server-market/"
+          >
+            Microsoft · marco de receita de 2005 ↗
+          </a>
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Limite da evidência:</strong>
+            não atribuímos esses números ao Windows 2000 ou ao
+            Windows Server 2003 isoladamente.
+          </p>
+
+          <p>
+            O percentual exato de 2000 e a participação específica
+            do Server 2003 continuam pendentes de uma fonte
+            comparável.
+          </p>
+        </div>
+
+        <figure id="animacao-mercado" class="animation-slot"><img src="animacoes/mercado.gif" alt="Comparação animada de licenças de servidor em 2001 e 2002; dados de receita em 2005 aparecem separadamente." loading="lazy"><figcaption>Percentuais de novas licenças de servidor. O marco de 2005 é de receita e não integra a série percentual.</figcaption></figure>
+      </section>
+
+      <!-- =====================================================
+           SEGURANÇA
+           ===================================================== -->
+
+      <section id="seguranca" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Segurança: por que recursos disponíveis não bastavam?
+        </h2>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Casos para discutir exposição e operação
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Caso</th>
+                <th scope="col">Problema</th>
+                <th scope="col">Lição</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Code Red / IIS, 2001</td>
+
+                <td>
+                  Exploração de vulnerabilidade em serviço exposto;
+                  já havia correção antes da propagação.
+                </td>
+
+                <td>
+                  Serviços desnecessários e atraso de patch
+                  aumentam o risco.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Nimda, 2001</td>
+
+                <td>
+                  Incidente útil para discutir propagação e gestão
+                  de correções em ambientes conectados.
+                </td>
+
+                <td>
+                  Não basta corrigir uma única máquina:
+                  inventário e cobertura importam.
+                </td>
+              </tr>
+
+              <tr>
+                <td>RPC/DCOM, MS03-026</td>
+
+                <td>
+                  Falha crítica que alcançava várias gerações,
+                  incluindo Windows Server 2003.
+                </td>
+
+                <td>
+                  Uma versão nova não elimina a necessidade
+                  de atualização e segmentação.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/ja-jp/security-updates/updatemanagement/19869658"
+          >
+            Microsoft · cronologia e gestão de patches
+            — documento em japonês ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/security-updates/securitybulletins/2003/ms03-026"
+          >
+            Microsoft · boletim MS03-026 ↗
+          </a>
+        </p>
+
+        <div class="callout">
+          <p>
+            Usaremos diagramas históricos, sem executar worms,
+            sistemas vulneráveis conectados à rede ou
+            demonstrações de exploração.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           SERVER 2003
+           ===================================================== -->
+
+      <section id="server2003" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>2003: habilitar apenas o necessário</h2>
+
+        <p>
+          O ponto de virada da narrativa é reduzir a superfície
+          de ataque, não “inventar as permissões NTFS”.
+        </p>
+
+        <p>
+          A comparação documentada do WebDAV é um exemplo concreto:
+          habilitado por padrão no Windows 2000, passou a ser
+          opcional no Server 2003.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://download.microsoft.com/download/8/1/6/816C597A-5592-4867-A0A6-A0181703CD59/Microsoft_Press_eBook_TheSecurityDevelopmentLifecycle_PDF.pdf"
+          >
+            Microsoft · Security Development Lifecycle — PDF ↗
+          </a>
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Dois princípios complementares:</strong>
+            habilitar apenas os serviços necessários e conceder
+            apenas os acessos necessários.
+          </p>
+
+          <p>
+            Não traduzir segurança como uma coleção indiscriminada
+            de regras <code>Deny</code>.
+          </p>
+        </div>
+
+        <p>
+          Para a Aurora, o servidor deve executar os papéis
+          planejados. O funcionário recebe acesso por função e
+          grupo, e não controle total apenas porque consegue
+          entrar na rede.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/archive/msdn-magazine/2008/november/access-control-understanding-windows-file-and-registry-permissions"
+          >
+            Microsoft · avaliação de permissões ↗
+          </a>
+        </p>
+
+        <figure id="animacao-2003" class="animation-slot"><img src="animacoes/seguranca.gif" alt="Animação que relaciona serviços necessários, grupos e permissões em um cenário ilustrativo." loading="lazy"><figcaption>O cenário ilustra decisões administrativas; não representa uma configuração padrão universal ou ausência de riscos.</figcaption></figure>
+      </section>
+
+      <!-- =====================================================
+           IDENTIDADE
+           ===================================================== -->
+
+      <section class="block-marker" id="bloco-2"><p class="kicker">BLOCO 02</p><h2>Identidade e permissões</h2><p>Do usuário ao acesso efetivo.</p></section>
+      <section id="conceitos" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>Quem é você? O que pode fazer?</h2>
+
+        <p>
+          Este aprofundamento apoia a história.
+          A prática é opcional e deve ocorrer somente
+          em ambiente autorizado.
+        </p>
+
+        <details>
+          <summary>
+            Abrir explicação e prática de observação
+          </summary>
+
+          <h3>Identidade, autenticação e autorização</h3>
+
+          <p>
+            <strong>Identidade</strong> representa um usuário,
+            computador ou serviço.
+            A <strong>autenticação</strong> procura comprovar
+            essa identidade.
+            A <strong>autorização</strong> determina o que ela
+            pode fazer.
+          </p>
+
+          <p>
+            <strong>Auditoria</strong> registra eventos quando
+            a política apropriada está configurada.
+            Não confunda a ausência de evento com prova
+            de que nada ocorreu.
+          </p>
+
+          <p>
+            Uma conta pode pertencer a vários grupos.
+            Uma permissão atribuída a um grupo pode alcançar
+            seus membros.
+          </p>
+
+          <p>
+            Alterações de associação podem exigir nova sessão
+            ou atualização do token antes de aparecer
+            em um teste.
+          </p>
+
+          <pre><code>whoami
 whoami /groups
-whoami /user</code></pre><p>No Prompt ou PowerShell, observe a identidade e os grupos da sessão atual. As saídas representam o contexto da sessão, não uma lista universal de todas as autorizações em toda a rede.</p></section><section id="ntfs" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>NTFS: permissões e herança</h2><p>Uma ACL reúne entradas de controle de acesso. Em uma pasta NTFS, use <strong>Propriedades → Segurança → Avançadas</strong> para observar proprietário, entradas e herança. Permissões frequentemente tratam leitura, gravação, modificação e controle total. Algumas entradas são herdadas do diretório pai; alterações na herança precisam ser planejadas.</p><pre><code>icacls "$env:USERPROFILE\LabSO"
-Get-Acl "$env:USERPROFILE\LabSO" | Format-List</code></pre><p>No PowerShell, crie uma pasta de teste em seu perfil com <code>New-Item -ItemType Directory -Path "$env:USERPROFILE\LabSO"</code> e consulte apenas essa pasta. A lista mostra regras; acesso efetivo depende também da identidade, dos grupos, de negações explícitas e do contexto. Evite concluir o resultado apenas por uma linha isolada da ACL.</p><h3>Exercício de laboratório</h3><ol><li>No Windows, crie uma pasta <code>LabSO</code> no seu perfil e um arquivo sem dados pessoais.</li><li>Abra a aba Segurança e registre permissões herdadas; consulte a mesma pasta com <code>icacls</code>.</li><li>Em papel, proponha uma regra para o grupo de laboratório e registre como a herança poderia afetá-la. Se tiver VM isolada e contas de teste, aplique nela sob orientação.</li><li>Descreva como testaria leitura e gravação com uma conta permitida e outra sem permissão. Na ausência das contas, identifique os resultados como hipóteses.</li><li>Compare sua hipótese com a ACL observada; identifique quais etapas exigem contas e um servidor de laboratório.</li></ol></section><section id="smb" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>Compartilhamento SMB e acesso efetivo</h2><p>SMB é um protocolo de acesso em rede; NTFS é o sistema de arquivos local neste exemplo. Uma pasta pode ter permissões de compartilhamento e permissões NTFS. Num acesso via SMB, ambas participam da decisão; teste a partir de um caminho UNC, por exemplo <code>\\SERVIDOR-LAB\Financeiro</code>.</p><pre><code>Get-SmbShare
-Get-SmbShareAccess -Name Financeiro</code></pre><p>Os comandos PowerShell consultam compartilhamentos disponíveis e suas regras no servidor quando o recurso e as permissões necessários existem. Um teste local pela pasta <code>LabSO</code> do seu perfil não é equivalente ao teste pela rede.</p><div class="callout"><p>Uma concessão ampla no compartilhamento não elimina as restrições NTFS; uma restrição no compartilhamento também pode impedir um acesso permitido localmente.</p></div></section><section id="ad" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>AD DS: domínio, unidades, grupos e DNS</h2><p>O Active Directory Domain Services (AD DS) organiza objetos como usuários, grupos e computadores em um domínio. Um controlador de domínio autentica e fornece serviços do diretório; DNS é uma dependência importante para localizar serviços. Unidades organizacionais (OUs) ajudam a organizar objetos e delegar administração; não substituem grupos de segurança.</p><p>Opcional: em uma VM de laboratório com AD DS já disponível, abra <strong>Server Manager → Tools → Active Directory Users and Computers</strong>. Identifique o domínio de teste, crie uma OU de laboratório, um grupo de segurança e uma conta de teste conforme orientação do professor; associe a conta ao grupo. Use um domínio de exemplo apenas em rede isolada.</p><pre><code>Get-ADDomain
+whoami /user</code></pre>
+
+          <p>
+            No Prompt ou PowerShell, observe a identidade
+            e os grupos da sessão atual.
+          </p>
+
+          <p>
+            As saídas representam o contexto da sessão,
+            não uma lista universal de todas as autorizações
+            em toda a rede.
+          </p>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           NTFS
+           ===================================================== -->
+
+      <section id="ntfs" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>NTFS: grupos, regras e herança</h2>
+
+        <p>
+          Este aprofundamento apoia a história.
+          A prática é opcional e deve ocorrer somente
+          em ambiente autorizado.
+        </p>
+
+        <details>
+          <summary>
+            Abrir explicação e prática de observação
+          </summary>
+
+          <h3>Permissões e herança</h3>
+
+          <p>
+            Uma ACL reúne entradas de controle de acesso.
+            Em uma pasta NTFS, use
+            <strong>Propriedades → Segurança → Avançadas</strong>
+            para observar proprietário, entradas e herança.
+          </p>
+
+          <p>
+            Permissões frequentemente tratam leitura, gravação,
+            modificação e controle total.
+            Algumas entradas são herdadas do diretório pai;
+            alterações na herança precisam ser planejadas.
+          </p>
+
+          <pre><code>icacls "$env:USERPROFILE\LabSO"
+Get-Acl "$env:USERPROFILE\LabSO" | Format-List</code></pre>
+
+          <p>
+            Execute esses exemplos no PowerShell.
+            Primeiro crie uma pasta de teste no seu perfil:
+          </p>
+
+          <pre><code>New-Item -ItemType Directory -Path "$env:USERPROFILE\LabSO"</code></pre>
+
+          <p>
+            Se a pasta já existir, não é necessário criá-la novamente.
+            Consulte apenas a pasta do laboratório.
+          </p>
+
+          <p>
+            A lista mostra regras. O acesso efetivo depende também
+            da identidade, dos grupos, das entradas aplicáveis
+            e do contexto.
+          </p>
+
+          <p>
+            Evite concluir o resultado apenas por uma linha isolada
+            da ACL.
+          </p>
+
+          <h3>Exercício opcional</h3>
+
+          <ol>
+            <li>
+              Crie uma pasta <code>LabSO</code> no seu perfil
+              e um arquivo sem dados pessoais.
+            </li>
+
+            <li>
+              Abra a aba Segurança e registre as permissões
+              herdadas.
+            </li>
+
+            <li>
+              Consulte a mesma pasta com <code>icacls</code>.
+            </li>
+
+            <li>
+              Em papel, proponha uma regra para um grupo
+              e registre como a herança poderia afetá-la.
+            </li>
+
+            <li>
+              Descreva como testaria leitura e gravação
+              com uma conta permitida e outra sem permissão.
+            </li>
+
+            <li>
+              Se não houver as contas e o ambiente necessários,
+              identifique os resultados como hipóteses.
+            </li>
+          </ol>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           SMB
+           ===================================================== -->
+
+      <section id="smb" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          SMB: acesso local não é acesso pela rede
+        </h2>
+
+        <p>
+          Este aprofundamento apoia a história.
+          A prática é opcional e deve ocorrer somente
+          em ambiente autorizado.
+        </p>
+
+        <details>
+          <summary>
+            Abrir explicação e prática de observação
+          </summary>
+
+          <h3>Compartilhamento e acesso efetivo</h3>
+
+          <p>
+            SMB é um protocolo de acesso em rede.
+            NTFS é o sistema de arquivos local neste exemplo.
+          </p>
+
+          <p>
+            Uma pasta pode ter permissões de compartilhamento
+            e permissões NTFS.
+            Em um acesso via SMB, ambas participam da decisão.
+          </p>
+
+          <p>Exemplo de caminho UNC:</p>
+
+          <pre><code>\\SERVIDOR-LAB\Financeiro</code></pre>
+
+          <p>
+            No servidor do laboratório, quando os recursos
+            e privilégios necessários estiverem disponíveis:
+          </p>
+
+          <pre><code>Get-SmbShare
+Get-SmbShareAccess -Name Financeiro</code></pre>
+
+          <p>
+            Esses comandos consultam compartilhamentos
+            e suas regras no contexto em que são executados.
+          </p>
+
+          <p>
+            Um teste local pela pasta <code>LabSO</code>
+            não é equivalente a um teste pela rede.
+          </p>
+
+          <div class="callout">
+            <p>
+              Uma concessão ampla no compartilhamento não elimina
+              as restrições NTFS.
+              Uma restrição no compartilhamento também pode
+              impedir um acesso permitido localmente.
+            </p>
+          </div>
+        </details>
+      <figure class="animation-slot"><img src="animacoes/smb-nfs.gif" alt="Clientes Windows, Linux e macOS acessam um servidor por SMB ou NFS em um cenário configurado." loading="lazy"><figcaption>Protocolos de rede e sistemas de arquivos têm funções diferentes; a disponibilidade depende da configuração.</figcaption></figure></section>
+
+      <!-- =====================================================
+           ACTIVE DIRECTORY
+           ===================================================== -->
+
+      <section id="ad" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Active Directory: o centro da administração da LAN
+        </h2>
+
+        <p>
+          Na Aurora, o desafio é conectar pessoas, contas,
+          grupos, computadores e recursos sem repetir
+          configurações em cada estação.
+        </p>
+
+        <p>
+          AD DS fornece o diretório e os serviços de domínio;
+          grupos ajudam a administrar acesso.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups"
+          >
+            Microsoft · grupos de segurança ↗
+          </a>
+        </p>
+
+        <div
+          class="flow"
+          aria-label="Fluxo conceitual de identidade e acesso"
+        >
+          Pessoa → conta → grupos → serviço solicitado →
+          decisão de acesso
+        </div>
+
+        <ul>
+          <li>
+            <strong>Domínio:</strong>
+            contexto do diretório e da administração.
+          </li>
+
+          <li>
+            <strong>Controlador de domínio:</strong>
+            fornece serviços do diretório e autenticação.
+          </li>
+
+          <li>
+            <strong>DNS:</strong>
+            participa da descoberta dos serviços do domínio.
+          </li>
+
+          <li>
+            <strong>Unidade organizacional:</strong>
+            organização e delegação;
+            não substitui grupo de segurança.
+          </li>
+
+          <li>
+            <strong>GPO:</strong>
+            políticas aplicadas conforme escopo e processamento;
+            não é simplesmente uma ACL de pasta.
+          </li>
+        </ul>
+
+        <p>
+          Uma autenticação bem-sucedida não concede automaticamente
+          acesso à pasta. O servidor do recurso avalia a autorização.
+        </p>
+
+        <p>
+          Mudanças de grupo também não devem ser apresentadas
+          como revogação instantânea de todas as sessões.
+        </p>
+
+        <figure id="animacao-ad" class="animation-slot"><img src="animacoes/identidade-ad.gif" alt="Animação do ciclo de uma conta, grupos, autenticação, autorização e mudança de departamento." loading="lazy"><figcaption>Grupos, acesso a arquivos e políticas de estação têm papéis distintos; mudanças podem exigir atualização de sessão.</figcaption></figure>
+
+        <details>
+          <summary>
+            Aprofundamento opcional:
+            observar um domínio de laboratório
+          </summary>
+
+          <h3>Domínio, OUs, grupos e DNS</h3>
+
+          <p>
+            O AD DS organiza objetos como usuários,
+            grupos e computadores em um domínio.
+          </p>
+
+          <p>
+            Um controlador de domínio autentica e fornece
+            serviços do diretório. DNS é uma dependência
+            importante para localizar esses serviços.
+          </p>
+
+          <p>
+            OUs ajudam a organizar objetos e delegar administração;
+            não substituem grupos de segurança.
+          </p>
+
+          <p>
+            Em uma VM de laboratório com AD DS já disponível,
+            abra:
+          </p>
+
+          <p>
+            <strong>
+              Server Manager → Tools →
+              Active Directory Users and Computers
+            </strong>
+          </p>
+
+          <p>
+            Identifique o domínio de teste.
+            Crie uma OU de laboratório, um grupo de segurança
+            e uma conta de teste conforme a orientação
+            do professor.
+          </p>
+
+          <p>
+            Associe a conta ao grupo.
+            Use um domínio de exemplo apenas em rede isolada.
+          </p>
+
+          <pre><code>Get-ADDomain
 Get-ADUser -Filter * -SearchBase "OU=Lab,DC=lab,DC=example"
-Get-ADGroupMember -Identity "GG-Lab-Financeiro"</code></pre><p>Os comandos exigem o módulo ActiveDirectory, conectividade e objetos correspondentes. Substitua o caminho e o nome pelos do laboratório. A instalação e a promoção de um controlador mudam a função da máquina: devem ser feitas somente na VM do exercício, seguindo o roteiro do professor.</p></section><section id="entra" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>Entra ID e identidade híbrida</h2><p><strong>Microsoft Entra ID</strong> é um serviço de identidade em nuvem; <strong>AD DS</strong> é o serviço de diretório de domínio tradicional. Eles possuem recursos e protocolos diferentes. O Microsoft Entra Domain Services é um serviço gerenciado distinto: não trate os três nomes como sinônimos.</p><p>Em um cenário híbrido autorizado, ferramentas como Microsoft Entra Connect Sync ou Cloud Sync podem sincronizar identidades selecionadas do AD DS para o Entra ID. O desenho de sincronização, as opções de autenticação, licenças e permissões precisam ser planejados. Sincronizar uma conta <strong>não copia automaticamente as permissões NTFS</strong> de uma pasta local para qualquer recurso de nuvem.</p><p><strong>Cenário para análise:</strong> desenhe uma seta do domínio local para o Entra ID, identifique o responsável pela identidade e explique como verificaria o acesso a uma pasta SMB local e a um aplicativo em nuvem. Aponte quais informações faltam antes de afirmar que o acesso funciona.</p></section><section id="diagnostico" class="lesson-section"><p class="kicker">11 · CONTEÚDO</p><h2>Diagnóstico: evidências e limites</h2><ol><li>Confirme o usuário da sessão com <code>whoami</code> e seus grupos com <code>whoami /groups</code>.</li><li>Identifique se o teste é local ou por UNC; confirme nome do servidor e conectividade do laboratório.</li><li>Observe regras do compartilhamento e NTFS; confira herança e possíveis entradas de negação.</li><li>Teste primeiro uma operação permitida e depois uma que deve ser negada, sem usar uma conta administradora como substituta do usuário.</li><li>Registre a configuração, a operação, o resultado observado e uma hipótese. Não inclua senhas nos registros.</li></ol><p>O resultado de um comando de consulta é uma evidência pontual. Uma auditoria completa exige política e coleta configuradas no ambiente.</p></section><section id="macos" class="lesson-section"><p class="kicker">PRÁTICA SIMULADA · macOS</p><h2>Terminal macOS: experimente no papel</h2><p>Digite o comando que você usaria em cada situação. Esta atividade compara texto com respostas previstas: <strong>não executa comandos, não acessa um Mac e não simula a saída real do terminal</strong>. Cada questão é independente. Muitos comandos também existem no Linux, mas opções e ferramentas podem variar.</p><noscript>Ative o JavaScript para responder às questões.</noscript><div id="mac-simulador"></div><script src="simulador-macos.js" defer></script></section><section id="exercicios" class="lesson-section"><p class="kicker">PRÁTICA E REVISÃO</p><h2>Exercícios para desenvolver</h2><p>Para cada item, registre procedimento, evidência e conclusão. Quando não houver o ambiente, descreva o teste e identifique o resultado como hipótese.</p><ol class="tasks"><li>Explique a diferença entre autenticação e autorização usando a pasta Financeiro.</li><li>Identifique usuário e grupos da sessão; registre apenas informações necessárias.</li><li>Crie uma tabela de permissões esperadas para Financeiro e Atendimento.</li><li>Observe a ACL de uma pasta de laboratório usando a interface e icacls.</li><li>Diferencie uma permissão herdada de uma explícita no seu cenário.</li><li>Compare acesso local com acesso por caminho UNC.</li><li>Descreva um teste positivo e um negativo para gravação em SMB.</li><li>Desenhe usuário, grupo, OU e domínio, indicando a função de cada um.</li><li>Explique por que DNS é importante em um domínio AD DS.</li><li>Compare AD DS e Entra ID e explique o que uma sincronização de identidades não garante sobre ACLs NTFS.</li><li>Diagnostique: uma conta autentica, mas não grava. Liste três verificações antes de mudar permissões.</li><li>Monte uma matriz com identidade, grupo, ação, regra esperada, resultado observado e evidência.</li></ol><details><summary>Como organizar sua entrega</summary><p>Informe o ambiente e a topologia, separe observação de hipótese e registre o resultado dos testes positivos e negativos. Revise o conteúdo antes de entregar: não inclua senhas, chaves ou dados pessoais desnecessários.</p></details></section><section id="fontes" class="lesson-section"><h2>Referências para aprofundar</h2><ul class="sources"><li><a href="https://learn.microsoft.com/en-us/entra/identity/domain-services/compare-identity-solutions">Microsoft · comparação entre AD DS e Entra</a></li><li><a href="https://learn.microsoft.com/en-us/azure/active-directory/fundamentals/sync-directory">Microsoft · sincronização de diretórios</a></li><li><a href="https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/access-checks-windows-apis-return-incorrect-results">Microsoft · acesso efetivo em compartilhamentos</a></li></ul></section><nav class="footnav" aria-label="Navegação"><a href="../aula10/index.html">← Aula anterior</a><a href="../aula12/index.html">Próxima aula →</a></nav><footer>IFSP · Sistemas Operacionais · Aula 11</footer></main></div></body></html>
+Get-ADGroupMember -Identity "GG-Lab-Financeiro"</code></pre>
+
+          <p>
+            Os comandos exigem o módulo ActiveDirectory,
+            conectividade e objetos correspondentes.
+          </p>
+
+          <p>
+            Substitua o caminho e o nome pelos do laboratório.
+            A instalação e a promoção de um controlador mudam
+            a função da máquina e devem seguir um roteiro próprio.
+          </p>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           EVOLUÇÃO DO AD
+           ===================================================== -->
+
+      <section id="evolucao-ad" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Evolução do AD: cada recurso responde a um problema
+        </h2>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Seleção didática de marcos.
+              Consultar requisitos antes de uma migração.
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Geração</th>
+                <th scope="col">Destaque</th>
+                <th scope="col">
+                  Problema de administração
+                </th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>2000</td>
+                <td>Introdução do Active Directory.</td>
+                <td>
+                  Centralizar identidades e computadores.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2003</td>
+                <td>
+                  Evolução de níveis funcionais e compatibilidade.
+                </td>
+                <td>
+                  Atualizar mantendo um plano de coexistência.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2008 / 2008 R2</td>
+                <td>
+                  RODC para cenários de filial;
+                  lixeira do AD introduzida no 2008 R2.
+                </td>
+                <td>
+                  Filial com limitações de segurança física
+                  e recuperação de objetos.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2012 / 2012 R2</td>
+                <td>
+                  Administração simplificada, interface para
+                  a lixeira e melhorias para DCs virtualizados.
+                </td>
+                <td>
+                  Reduzir esforço operacional e melhorar
+                  a implantação.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2016</td>
+                <td>Nível funcional 2016.</td>
+                <td>
+                  Capacidades e requisitos do domínio
+                  e da floresta.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2019 / 2022</td>
+                <td>
+                  Sem novos níveis funcionais com esses nomes.
+                </td>
+                <td>
+                  Separar versão do SO de capacidade funcional
+                  do diretório.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2025</td>
+                <td>
+                  Novo nível funcional e evolução do AD,
+                  incluindo páginas de 32 KiB e dMSA.
+                </td>
+                <td>
+                  Escala, segurança e contas de serviço;
+                  avaliar requisitos específicos.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="callout">
+          <p>
+            <strong>Não são a mesma coisa:</strong>
+          </p>
+
+          <ul>
+            <li>Versão do Windows Server.</li>
+            <li>Nível funcional do domínio.</li>
+            <li>Nível funcional da floresta.</li>
+          </ul>
+
+          <p>
+            Instalar um novo SO não equivale a habilitar
+            automaticamente todos os recursos.
+          </p>
+        </div>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels"
+          >
+            Microsoft · níveis funcionais ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/ad-ds-simplified-administration"
+          >
+            Microsoft · administração simplificada ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025"
+          >
+            Microsoft · Active Directory em 2025 ↗
+          </a>
+        </p>
+      </section>
+
+      <!-- =====================================================
+           VERSÕES RECENTES
+           ===================================================== -->
+
+      <section class="block-marker" id="bloco-3"><p class="kicker">BLOCO 03</p><h2>Automação e nuvem</h2><p>Das políticas locais à identidade híbrida.</p></section>
+      <section id="versoes-recentes" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Depois de 2015: o que muda para quem administra?
+        </h2>
+
+        <p>
+          O objetivo não é decorar todos os lançamentos.
+          É relacionar recursos a necessidades.
+        </p>
+
+        <p>
+          Nome de versão não é necessariamente ano de
+          disponibilidade: Server 2022 foi disponibilizado em 2021;
+          Server 2025, em 2024.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info"
+          >
+            Microsoft · informações de lançamento ↗
+          </a>
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Exemplos selecionados.
+              Edição, atualização e hardware podem limitar
+              a disponibilidade.
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Versão</th>
+                <th scope="col">Recursos para apresentar</th>
+                <th scope="col">Tradução didática</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>2016</td>
+
+                <td>
+                  Containers Windows e Shielded VMs.
+                </td>
+
+                <td>
+                  Novas formas de executar aplicações
+                  e proteger máquinas virtuais.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2019</td>
+
+                <td>
+                  Windows Admin Center,
+                  Storage Migration Service
+                  e melhorias de segurança.
+                </td>
+
+                <td>
+                  Administração por navegador e migração
+                  de armazenamento.
+                  WAC é ferramenta de gestão,
+                  não exclusividade dessa versão.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2022</td>
+
+                <td>
+                  Secured-core, TLS 1.3
+                  e melhorias SMB.
+                </td>
+
+                <td>
+                  Proteção que considera hardware,
+                  sistema e comunicação.
+                </td>
+              </tr>
+
+              <tr>
+                <td>2025</td>
+
+                <td>
+                  Evolução do AD, dMSA e SMB over QUIC
+                  em Standard e Datacenter.
+                </td>
+
+                <td>
+                  Identidade e acesso remoto
+                  continuam evoluindo.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2016"
+          >
+            Novidades de 2016 ↗
+          </a>
+          ·
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2019"
+          >
+            Novidades de 2019 ↗
+          </a>
+          ·
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2022"
+          >
+            Novidades de 2022 ↗
+          </a>
+          ·
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025"
+          >
+            Novidades de 2025 ↗
+          </a>
+        </p>
+
+        <div class="callout">
+          <p>
+            No Server 2022, SMB over QUIC está associado
+            à Datacenter: Azure Edition.
+            No 2025, a disponibilidade também alcança
+            Standard e Datacenter.
+          </p>
+
+          <p>
+            Esse é um exemplo de por que verificar versão,
+            edição e requisitos antes de prometer um recurso.
+          </p>
+        </div>
+      </section>
+
+      <!-- =====================================================
+           POWERSHELL E WSL
+           ===================================================== -->
+
+      <section id="powershell" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          PowerShell: de cliques repetidos à administração
+          reproduzível
+        </h2>
+
+        <p>
+          Uma alteração em uma máquina pode ser confortável
+          na interface gráfica.
+          Repeti-la em dezenas de máquinas exige padronização,
+          automação e registro.
+        </p>
+
+        <p>
+          PowerShell não foi substituído pelo WSL.
+          A abertura do projeto e seu anúncio para Linux e macOS
+          em 2016 mostram uma estratégia multiplataforma.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://devblogs.microsoft.com/powershell/powershell-on-linux-and-open-source-2/"
+          >
+            PowerShell Team · anúncio de 2016 ↗
+          </a>
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Ferramentas com objetivos diferentes
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Ferramenta</th>
+                <th scope="col">Papel</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Interface gráfica</td>
+                <td>
+                  Explorar, visualizar e administrar
+                  interativamente.
+                </td>
+              </tr>
+
+              <tr>
+                <td>PowerShell</td>
+                <td>
+                  Automatizar consultas e tarefas administrativas.
+                </td>
+              </tr>
+
+              <tr>
+                <td>WSL</td>
+                <td>
+                  Executar ambiente e ferramentas Linux
+                  no Windows.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Correção histórica: Microsoft e SUSE</h3>
+
+        <p>
+          Em 2006 houve um acordo de colaboração Microsoft–Novell
+          para interoperabilidade Windows/Linux, envolvendo
+          SUSE Linux Enterprise.
+        </p>
+
+        <p>
+          Isso não foi uma aquisição da SUSE pela Microsoft.
+          Também não sustenta a ideia de que o WSL surgiu
+          porque PowerShell “não deu certo”.
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://news.microsoft.com/source/2006/11/02/microsoft-and-novell-announce-broad-collaboration-on-windows-and-linux-interoperability-and-support/"
+          >
+            Microsoft · acordo de 2006 ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows/wsl/about"
+          >
+            Microsoft · o que é WSL ↗
+          </a>
+        </p>
+
+        <h3>Demonstração curta e somente de consulta</h3>
+
+        <pre><code>Get-Service |
+  Select-Object -First 5 Name, Status
+
+Get-Process |
+  Sort-Object CPU -Descending |
+  Select-Object -First 5 Name, CPU</code></pre>
+
+        <p>
+          Execute no PowerShell.
+          A coluna CPU representa tempo de processador acumulado em segundos, não porcentagem instantânea.
+          As saídas variam por máquina.
+          O exemplo não instala funções, não altera permissões
+          e não depende de AD.
+        </p>
+      </section>
+
+      <!-- =====================================================
+           REMOTO E CLOUD
+           ===================================================== -->
+
+      <section id="remoto-cloud" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Por que ainda existe Windows Server fora da LAN tradicional?
+        </h2>
+
+        <p>
+          Não basta perguntar onde está a máquina.
+          Precisamos saber qual serviço continua necessário:
+          identidade, aplicação, arquivos, gestão ou compatibilidade.
+        </p>
+
+        <p>
+          Uma VM em outro local não elimina a administração
+          de seu sistema operacional.
+        </p>
+
+        <div class="table-wrap">
+          <table>
+            <caption>
+              Matriz de decisão proposta para o caso Aurora,
+              não ranking de mercado
+            </caption>
+
+            <thead>
+              <tr>
+                <th scope="col">Critério</th>
+                <th scope="col">Valor possível</th>
+                <th scope="col">Custo ou risco</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr>
+                <td>Identidade e políticas</td>
+
+                <td>
+                  Integração com domínio e gestão existente.
+                </td>
+
+                <td>
+                  Concentração de privilégios
+                  e necessidade de proteção do AD.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Aplicações</td>
+
+                <td>
+                  Compatibilidade com ERP e serviços existentes.
+                </td>
+
+                <td>
+                  Dependência e custo de migração.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Arquivos</td>
+
+                <td>
+                  Compartilhamentos e regras conhecidos.
+                </td>
+
+                <td>
+                  Backup, recuperação, disponibilidade
+                  e governança.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Equipe</td>
+
+                <td>
+                  Conhecimento e processos consolidados.
+                </td>
+
+                <td>
+                  Treinamento e manutenção de competências.
+                </td>
+              </tr>
+
+              <tr>
+                <td>Licenciamento</td>
+
+                <td>
+                  Recursos adequados à edição escolhida.
+                </td>
+
+                <td>
+                  Avaliar custos e requisitos
+                  de licenças e CALs aplicáveis.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/securing-domain-controllers-against-attack"
+          >
+            Microsoft · proteção de controladores de domínio ↗
+          </a>
+        </p>
+
+        <p>
+          <a
+            class="source-inline"
+            href="https://learn.microsoft.com/en-us/windows-server/get-started/editions-comparison"
+          >
+            Microsoft · comparação de edições ↗
+          </a>
+        </p>
+
+        <div class="callout">
+          <p>
+            <strong>Cloud apenas teórica nesta aula.</strong>
+          </p>
+
+          <p>
+            Diferenciar servidor local, VM em provedor,
+            serviço gerenciado e SaaS.
+          </p>
+
+          <p>
+            Não instalar conectores, sincronizar contas reais
+            ou promover integração com nuvem.
+          </p>
+        </div>
+
+        <details id="entra">
+          <summary>
+            Complemento conceitual:
+            AD DS não é Entra ID
+          </summary>
+
+          <p>
+            AD DS, Microsoft Entra ID e Microsoft Entra
+            Domain Services são soluções distintas.
+          </p>
+
+          <p>
+            Sincronizar identidades não copia automaticamente
+            permissões NTFS para qualquer recurso de nuvem.
+          </p>
+
+          <p>
+            A implantação híbrida fica para uma etapa futura.
+          </p>
+
+          <p>
+            <a
+              href="https://learn.microsoft.com/en-us/entra/identity/domain-services/compare-identity-solutions"
+            >
+              Microsoft · comparação de soluções de identidade
+            </a>
+          </p>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           DIAGNÓSTICO
+           ===================================================== -->
+
+      <section class="block-marker" id="bloco-4"><p class="kicker">BLOCO 04</p><h2>Aplicação e revisão</h2><p>Evidências, prática e desafios.</p></section>
+      <section id="diagnostico" class="lesson-section">
+        <p class="kicker">AULA 11 · WINDOWS SERVER</p>
+
+        <h2>
+          Prática opcional: evidência antes de mudar
+        </h2>
+
+        <details>
+          <summary>
+            Abrir checklist de diagnóstico seguro
+          </summary>
+
+          <h3>Diagnóstico: evidências e limites</h3>
+
+          <ol>
+            <li>
+              Confirme o usuário da sessão com
+              <code>whoami</code> e seus grupos com
+              <code>whoami /groups</code>.
+            </li>
+
+            <li>
+              Identifique se o teste é local ou por UNC.
+              Confirme nome do servidor e conectividade
+              do laboratório.
+            </li>
+
+            <li>
+              Observe regras do compartilhamento e NTFS.
+              Confira herança e possíveis entradas de negação.
+            </li>
+
+            <li>
+              Teste primeiro uma operação permitida e depois
+              uma que deve ser negada.
+              Não use uma conta administradora como substituta
+              do usuário.
+            </li>
+
+            <li>
+              Registre a configuração, a operação, o resultado
+              observado e uma hipótese.
+              Não inclua senhas nos registros.
+            </li>
+          </ol>
+
+          <p>
+            O resultado de um comando de consulta é uma evidência
+            pontual. Uma auditoria completa exige política
+            e coleta configuradas no ambiente.
+          </p>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           DESAFIO FINAL
+           ===================================================== -->
+
+      <section id="exercicios" class="lesson-section">
+        <p class="kicker">PRÁTICA E REVISÃO</p>
+
+        <h2>
+          Desafio final: a próxima decisão da Aurora
+        </h2>
+
+        <p>
+          A Aurora tem matriz, filial, funcionários remotos,
+          pastas departamentais e um ERP que depende de Windows.
+          Não há orçamento nem requisitos completos disponíveis.
+        </p>
+
+        <ol class="tasks">
+          <li>
+            Qual problema concreto Windows Server e AD
+            resolvem neste cenário?
+          </li>
+
+          <li>
+            Explique por que Windows 2000 não significa
+            “ausência de permissões”.
+          </li>
+
+          <li>
+            Qual foi a mudança de postura discutida para 2003?
+          </li>
+
+          <li>
+            Por que 55,1% de novas licenças não significa
+            55,1% de todas as instalações?
+          </li>
+
+          <li>
+            Desenhe conta, grupo, recurso e decisão de acesso.
+            Separe autenticação de autorização.
+          </li>
+
+          <li>
+            Compare versão do SO e nível funcional.
+          </li>
+
+          <li>
+            Escolha um recurso de 2016 em diante e associe-o
+            a uma necessidade.
+          </li>
+
+          <li>
+            Explique por que WSL não substitui PowerShell.
+          </li>
+
+          <li>
+            Liste uma razão para manter um serviço local
+            e uma para avaliar uma alternativa gerenciada.
+          </li>
+
+          <li>
+            Quais dados de custo, compatibilidade e risco faltam
+            antes de recomendar uma migração?
+          </li>
+        </ol>
+
+        <details>
+          <summary>Orientação para entrega</summary>
+
+          <p>
+            Entregue uma página com:
+          </p>
+
+          <ul>
+            <li>Decisão proposta.</li>
+            <li>Justificativa.</li>
+            <li>Riscos.</li>
+            <li>Informações faltantes.</li>
+          </ul>
+
+          <p>
+            Separe fato documentado, resultado observado
+            e hipótese.
+            Não inclua senhas ou dados pessoais.
+          </p>
+        </details>
+      </section>
+
+      <!-- =====================================================
+           REFERÊNCIAS
+           ===================================================== -->
+
+      <section id="pratica-doze" class="lesson-section"><p class="kicker">PRÁTICA E REVISÃO</p><h2>Exercícios para desenvolver</h2><p>Para cada item, registre procedimento, evidência e conclusão. Quando não houver o ambiente, descreva o teste e identifique o resultado como hipótese.</p><ol class="tasks"><li>Explique a diferença entre autenticação e autorização usando a pasta Financeiro.</li><li>Identifique usuário e grupos da sessão; registre apenas informações necessárias.</li><li>Crie uma tabela de permissões esperadas para Financeiro e Atendimento.</li><li>Observe a ACL de uma pasta de laboratório usando a interface e icacls.</li><li>Diferencie uma permissão herdada de uma explícita no seu cenário.</li><li>Compare acesso local com acesso por caminho UNC.</li><li>Descreva um teste positivo e um negativo para gravação em SMB.</li><li>Desenhe usuário, grupo, OU e domínio, indicando a função de cada um.</li><li>Explique por que DNS é importante em um domínio AD DS.</li><li>Compare AD DS e Entra ID e explique o que uma sincronização de identidades não garante sobre ACLs NTFS.</li><li>Diagnostique: uma conta autentica, mas não grava. Liste três verificações antes de mudar permissões.</li><li>Monte uma matriz com identidade, grupo, ação, regra esperada, resultado observado e evidência.</li></ol><details><summary>Como organizar sua entrega</summary><p>Informe o ambiente e a topologia, separe observação de hipótese e registre o resultado dos testes positivos e negativos. Revise o conteúdo antes de entregar: não inclua senhas, chaves ou dados pessoais desnecessários.</p></details></section>
+<section id="macos" class="lesson-section"><p class="kicker">PRÁTICA SIMULADA · macOS</p><h2>Terminal macOS: experimente no papel</h2><p>Digite o comando que você usaria em cada situação. Esta atividade compara texto com respostas previstas: <strong>não executa comandos, não acessa um Mac e não simula a saída real do terminal</strong>. Cada questão é independente. Muitos comandos também existem no Linux, mas opções e ferramentas podem variar.</p><noscript>Ative o JavaScript para responder às questões.</noscript><div id="mac-simulador"></div><script src="simulador-macos.js" defer></script></section>
+<section id="fontes" class="lesson-section">
+        <h2>Referências e limites da aula</h2>
+
+        <p>
+          Revisão editorial: 31/10/2026.
+          Recursos e requisitos podem mudar com atualizações.
+          Consulte a documentação antes de implantar.
+        </p>
+
+        <p>
+          Os espaços de animação são roteiros,
+          não arquivos já renderizados.
+        </p>
+
+        <ul class="sources">
+          <li>
+            <a
+              href="https://www.theregister.com/on-prem/2003/10/08/windows-linux-gain-in-server-sales-but-what-about-free/1345092"
+            >
+              Mercado 2001–2002 —
+              The Register, citando IDC
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://www.microsoft.com/en-us/windows-server/blog/2006/03/01/windows-server-in-1st-place-in-world-wide-server-market/"
+            >
+              Receita de servidores em 2005 —
+              Microsoft, citando IDC
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://download.microsoft.com/download/8/1/6/816C597A-5592-4867-A0A6-A0181703CD59/Microsoft_Press_eBook_TheSecurityDevelopmentLifecycle_PDF.pdf"
+            >
+              Security Development Lifecycle —
+              Microsoft — PDF
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/ja-jp/security-updates/updatemanagement/19869658"
+            >
+              Gestão de patches e incidentes históricos —
+              Microsoft — japonês
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/security-updates/securitybulletins/2003/ms03-026"
+            >
+              Boletim MS03-026 — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/archive/msdn-magazine/2008/november/access-control-understanding-windows-file-and-registry-permissions"
+            >
+              Permissões de arquivos e registro — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/troubleshoot/windows-client/windows-security/permissions-on-copying-moving-files"
+            >
+              Permissões NTFS em Windows 2000 e 2003 — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/active-directory-functional-levels"
+            >
+              Níveis funcionais do AD DS — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/ad-ds-simplified-administration"
+            >
+              Administração simplificada do AD DS — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/understand-security-groups"
+            >
+              Grupos de segurança do AD — Microsoft
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2016"
+            >
+              Novidades do Windows Server 2016
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2019"
+            >
+              Novidades do Windows Server 2019
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-in-windows-server-2022"
+            >
+              Novidades do Windows Server 2022
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/get-started/whats-new-windows-server-2025"
+            >
+              Novidades do Windows Server 2025
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://devblogs.microsoft.com/powershell/powershell-on-linux-and-open-source-2/"
+            >
+              PowerShell aberto e multiplataforma — 2016
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://news.microsoft.com/source/2006/11/02/microsoft-and-novell-announce-broad-collaboration-on-windows-and-linux-interoperability-and-support/"
+            >
+              Acordo Microsoft–Novell — 2006
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows/wsl/about"
+            >
+              O que é Windows Subsystem for Linux
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/plan/security-best-practices/securing-domain-controllers-against-attack"
+            >
+              Proteção de controladores de domínio
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows-server/get-started/editions-comparison"
+            >
+              Comparação de edições do Windows Server
+            </a>
+          </li>
+
+          <li>
+            <a
+              href="https://learn.microsoft.com/en-us/windows/release-health/windows-server-release-info"
+            >
+              Informações de lançamento do Windows Server
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <nav
+        class="footnav"
+        aria-label="Navegação entre aulas"
+      >
+        <a href="../aula10/index.html">
+          ← Aula anterior
+        </a>
+
+        <a href="../aula12/index.html">
+          Próxima aula →
+        </a>
+      </nav>
+
+      <footer>
+        IFSP · Sistemas Operacionais · Aula 11 ·
+        Prof. Cristiano Pessoa
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    /*
+     * Controle local do tema.
+     *
+     * Não depende do JavaScript compartilhado.
+     * localStorage é opcional: a página continua funcionando
+     * mesmo quando o armazenamento estiver indisponível.
+     */
+    (() => {
+      const button = document.getElementById("tema");
+
+      if (!button) {
+        return;
+      }
+
+      let light = false;
+
+      try {
+        light = localStorage.getItem("aula11-theme") === "light";
+      } catch {
+        // Armazenamento indisponível: manter padrão escuro.
+      }
+
+      function applyTheme() {
+        document.body.classList.toggle("a11-light", light);
+
+        button.setAttribute(
+          "aria-pressed",
+          String(light)
+        );
+
+        button.textContent = light
+          ? "Tema escuro"
+          : "Tema claro";
+      }
+
+      applyTheme();
+
+      button.addEventListener("click", () => {
+        light = !light;
+        applyTheme();
+
+        try {
+          localStorage.setItem(
+            "aula11-theme",
+            light ? "light" : "dark"
+          );
+        } catch {
+          // Falha de persistência não impede a troca do tema.
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
