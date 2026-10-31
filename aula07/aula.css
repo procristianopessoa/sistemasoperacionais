@@ -60,3 +60,15 @@ button { cursor: pointer; background: #dff7fb; color: #075669; font-weight: 800;
 .score { font-weight: 800; color: #075669; }
 footer { padding: 30px 0; color: var(--cinza); font-size: .9rem; }
 @media (max-width: 760px) { .bar .wrap { padding: 12px 0; align-items: flex-start; flex-direction: column; } .hero { padding: 68px 0 54px; } .grid, .wide { grid-template-columns: 1fr; } .wrap { width: min(100% - 28px, 1120px); } }
+
+/* Atividades distribuídas ao longo da aula. */
+.guided-activity { margin-top: 32px; padding: 24px; border: 1px solid var(--so-line); border-left: 5px solid var(--so-accent); border-radius: 12px; background: var(--so-paper); color: var(--so-ink); }
+.guided-activity h3 { color: var(--so-ink); font-size: 1.45rem; }
+.guided-activity li + li { margin-top: .55em; }
+.guided-activity details { margin-top: 18px; padding: 14px 18px; border: 1px solid var(--so-line); border-radius: 8px; background: var(--so-soft); }
+.guided-activity summary { cursor: pointer; font-weight: 700; }
+.guided-activity summary:focus-visible { outline: 3px solid #f7ab32; outline-offset: 3px; }
+
+/* Manter títulos e tabelas legíveis nos dois temas. */
+:root[data-so-theme="dark"] :is(h1,h2,h3) { color: var(--so-ink); }
+:root[data-so-theme="dark"] .table { background: var(--so-paper); color: var(--so-ink); }
