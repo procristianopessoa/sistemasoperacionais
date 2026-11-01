@@ -226,8 +226,8 @@
           section.querySelector('.wheel-detail h3').textContent = lesson.title;
           section.querySelector('.wheel-detail p').textContent = lesson.summary;
           var link = section.querySelector('.open-link'); link.href = lesson.href;
-          link.textContent = Number(num) >= 10 ? 'Ver planejamento ↗' : 'Abrir aula ↗';
-          link.setAttribute('aria-label', (Number(num) >= 10 ? 'Ver planejamento da aula ' : 'Abrir aula ') + num + ': ' + lesson.title);
+          link.textContent = Number(num) >= 13 ? 'Ver planejamento ↗' : 'Abrir aula ↗';
+          link.setAttribute('aria-label', (Number(num) >= 13 ? 'Ver planejamento da aula ' : 'Abrir aula ') + num + ': ' + lesson.title);
         }
         nodes.forEach(function(node) {
           var lesson = lessons[node.dataset.lesson];
